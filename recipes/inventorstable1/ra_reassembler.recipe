@@ -1,0 +1,11 @@
+{
+  "input" : [
+    { "item" : "logblock", "count" : 1 }   
+  ],
+  "output" : {
+    "item" : "ra_reassembler",
+    "count" : 1
+  },
+  "duration" : 5,
+  "groups" : [ "inventorstable", "craftingstations", "all" ]
+}

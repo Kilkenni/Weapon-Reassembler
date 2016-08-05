@@ -1,0 +1,11 @@
+{
+  "name" : "Reassembler",
+  "version" : "1.0",
+  "path" : ".",
+  "dependencies" : [],
+  "metadata" : {
+    "author" : "MelOzone",
+    "version" : "0.1a",
+    "description" : "A test mod adding a crafting station to reassemble your weapon in game, changing its drawable (appearance)."
+  }
+}

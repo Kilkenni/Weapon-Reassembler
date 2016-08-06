@@ -6,8 +6,8 @@ function init()
 end
 
 function ra.renameButton(widgetName)
-  ra.renameVisible = not ic.renameVisible
-  widget.setVisible("ra_boxRename", ic.renameVisible)
+  ra.renameVisible = not ra.renameVisible
+  widget.setVisible("ra_boxRename", ra.renameVisible)
   widget.focus( ra.renameVisible and "ra_boxRename" or "ra_btnRename" )
 end
 

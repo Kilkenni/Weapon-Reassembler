@@ -37,7 +37,7 @@
 
   "openSounds" : [ "/sfx/objects/outpostbutton.ogg" ],
   "closeSounds" : [ "/sfx/objects/outpostbutton.ogg" ],
-  "slotCount" : 2,
+  "slotCount" : 3,
   "uiConfig" : "/interface/ra_reassembler/reassembler.config",
   "frameCooldown" : 5,
   "autoCloseCooldown" : 10,

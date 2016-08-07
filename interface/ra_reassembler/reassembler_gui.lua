@@ -16,7 +16,11 @@ function ra.renameButton(widgetName)
 end
 
 function ra.reconstructButton(widgetName)
-	widget.playSound("/sfx/tools/pickaxe_precious.ogg")
+	world.sendEntityMessage(pane.containerEntityId(), "reconstructGun")
+end
+
+function ra.resetButton(widgetName)
+	world.sendEntityMessage(pane.containerEntityId(), "resetGun")
 end
 
 function ra.renameThis(widgetName)
@@ -25,6 +29,6 @@ function ra.renameThis(widgetName)
   widget.focus("ra_btnRename")
   local newName = widget.getText("ra_boxRename")
   if newName then
-	world.sendEntityMessage(pane.containerEntityId(), "renameThing", newName)
+	world.sendEntityMessage(pane.containerEntityId(), "renameGun", newName)
   end
 end

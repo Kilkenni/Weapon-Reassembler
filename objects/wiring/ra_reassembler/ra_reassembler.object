@@ -4,6 +4,7 @@
   "rarity" : "Rare",
   "race" : "generic",
   "objectType" : "container",
+   "category" : "Device",
 
   "price" : 100,
   "printable" : false,

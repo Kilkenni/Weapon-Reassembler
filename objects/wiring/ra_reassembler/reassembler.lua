@@ -75,9 +75,10 @@ function ra.reconstructGun(msg, something, newName)
 	if not world.containerItemAt(entity.id(), 0) or not world.containerItemAt(entity.id(), 1) or world.containerItemAt(entity.id(), 2) then --if there is no edited gun or no template or output slot is occupied
 		return false
 	end
-	local modgun = world.containerTakeAt(entity.id(), 0)
+	local modgun = world.containerItemAt(entity.id(), 0)
 	local template = world.containerItemAt(entity.id(), 1)
-	if world.containerItemAt(entity.id(), 0).name ~= "commonassaultrifle" or world.containerItemAt(entity.id(), 0).name ~= world.containerItemAt(entity.id(), 1).name then --if not assault rifle or weapon type mismatch
+	local templatecfg = root.itemConfig(world.containerItemAt(entity.id(), 1))
+	if modgun.name ~= "commonassaultrifle" or modgun.name ~= template.name then --if not assault rifle or weapon type mismatch
 		return false
 	end
 	
@@ -89,6 +90,11 @@ function ra.reconstructGun(msg, something, newName)
 	end]]--
 	
 	modgun.parameters.animationPartVariants = template.parameters.animationPartVariants
+	--modgun.parameters.paletteSwaps = templatecfg.config.paletteSwaps
+	--sb.logInfo("[HELP DUMP item]"..templatecfg.config.paletteSwaps);
+	for part,index in pairs(templatecfg.config) do
+		sb.logInfo("[HELP DUMP templatecfg]"..part.." : "..tostring(index));
+	end
 	
-	world.containerPutItemsAt(entity.id(), item, 2)
+	world.containerPutItemsAt(entity.id(), modgun, 2)
 end

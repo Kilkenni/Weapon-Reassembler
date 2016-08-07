@@ -1,10 +1,9 @@
 {
   "objectName" : "ra_reassembler",
   "colonyTags" : ["crafting"],
-  "rarity" : "Uncommon",
+  "rarity" : "Rare",
   "race" : "generic",
   "objectType" : "container",
-  "category" : "Device",
 
   "price" : 100,
   "printable" : false,
@@ -30,14 +29,13 @@
       "frames" : 14,
       "animationCycle" : 2.4,
 
-      "spaceScan" : 0.1,
-      "anchors" : [ "bottom" ]
+      "spaceScan" : 0.1
     }
   ],
 
   "openSounds" : [ "/sfx/objects/outpostbutton.ogg" ],
   "closeSounds" : [ "/sfx/objects/outpostbutton.ogg" ],
-  "slotCount" : 3,
+  "slotCount" : 4,
   "uiConfig" : "/interface/ra_reassembler/reassembler.config",
   "frameCooldown" : 5,
   "autoCloseCooldown" : 10,

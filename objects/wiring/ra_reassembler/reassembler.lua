@@ -28,5 +28,4 @@ function ra.renameItem(msg, something, newName)
 		sb.logInfo("[HELP DUMP ]"..key.." : "..tostring(value));
 	end
 	world.containerPutItemsAt(entity.id(), item, 2)
-	object.setConfigParameter("shortdescription", newName)
 end

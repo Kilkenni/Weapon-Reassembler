@@ -1,5 +1,5 @@
 {
-  "name" : "Reassembler",
+  "name" : "Weapon_Reassembler",
   "version" : "1.0",
   "path" : ".",
   "dependencies" : [],

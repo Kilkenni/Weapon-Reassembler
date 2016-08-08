@@ -1,46 +1,46 @@
 {
-  "objectName" : "ra_reassembler",
-  "colonyTags" : ["crafting"],
-  "rarity" : "Rare",
-  "race" : "generic",
-  "objectType" : "container",
-   "category" : "Device",
+	"objectName" : "ra_reassembler",
+	"colonyTags" : ["crafting"],
+	"rarity" : "Rare",
+	"race" : "generic",
+	"objectType" : "container",
+	"category" : "Device",
 
-  "price" : 100,
-  "printable" : false,
-  
-  "inventoryIcon" : "reassemblericon.png",
+	"price" : 100,
+	"printable" : false,
+	
+	"inventoryIcon" : "reassemblericon.png",
 
-  "description" : "Weapon reassembler allows you to edit your weapon's appearance.",
-  "shortdescription" : "^orange;Weapon Reassembler^white;",
+	"description" : "Weapon reassembler allows you to edit your weapon's appearance.",
+	"shortdescription" : "^orange;Weapon Reassembler^white;",
 
-  "apexDescription" : "A table with a bunch of tools for a craftsman.",
-  "avianDescription" : "A chance to display one's ability to create.",
-  "floranDescription" : "Floran ussse table. Make nice thingss.",
-  "glitchDescription" : "Inspired. Crafting module activated.",
-  "humanDescription" : "I can use materials I've found here to create new things.",
-  "hylotlDescription" : "A chance to create.",
-  "novakidDescription" : "I can use materials I've found here to create new things.",
+	"apexDescription" : "A table with a bunch of tools for a craftsman.",
+	"avianDescription" : "A chance to display one's ability to create.",
+	"floranDescription" : "Floran ussse table. Make nice thingss.",
+	"glitchDescription" : "Inspired. Crafting module activated.",
+	"humanDescription" : "I can use materials I've found here to create new things.",
+	"hylotlDescription" : "A chance to create.",
+	"novakidDescription" : "I can use materials I've found here to create new things.",
 
-  "orientations" : [
-    {
-	  "image" : "reassembler.png:<color>.<frame>",
+	"orientations" : [
+		{
+		"image" : "reassembler.png:<color>.<frame>",
 
-      "imagePosition" : [0, 0],
-      "frames" : 14,
-      "animationCycle" : 2.4,
+			"imagePosition" : [0, 0],
+			"frames" : 14,
+			"animationCycle" : 2.4,
 
-      "spaceScan" : 0.1
-    }
-  ],
+			"spaceScan" : 0.1
+		}
+	],
 
-  "openSounds" : [ "/sfx/objects/outpostbutton.ogg" ],
-  "closeSounds" : [ "/sfx/objects/outpostbutton.ogg" ],
-  "slotCount" : 4,
-  "uiConfig" : "/interface/ra_reassembler/reassembler.config",
-  "frameCooldown" : 5,
-  "autoCloseCooldown" : 10,
-  
-  "scripts" : [ "reassembler.lua", "/scripts/util.lua", "/scripts/vec2.lua" ],
-  "scriptDelta" : 50
+	"openSounds" : [ "/sfx/objects/cropshipper_arm_up.ogg" ],
+	"closeSounds" : [ "/sfx/objects/cropshipper_arm_down.ogg" ],
+	"slotCount" : 4,
+	"uiConfig" : "/interface/ra_reassembler/reassembler.config",
+	"frameCooldown" : 5,
+	"autoCloseCooldown" : 10,
+	
+	"scripts" : [ "reassembler.lua", "/scripts/util.lua", "/scripts/vec2.lua" ],
+	"scriptDelta" : 50
 }

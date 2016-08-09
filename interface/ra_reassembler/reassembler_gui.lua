@@ -2,6 +2,8 @@ require "/scripts/util.lua"
 ra = {}
 ra.acceptableGun = {"commonpistol","uncommonpistol","rarepistol","commonmachinepistol","uncommonmachinepistol","raremachinepistol","commonassaultrifle","uncommonassaultrifle","rareassaultrifle","commonsniperrifle","uncommonsniperrifle","raresniperrifle","commonshotgun","uncommonshotgun","rareshotgun","commongrenadelauncher","uncommongrenadelauncher","raregrenadelauncher","commonrocketlauncher","uncommonrocketlauncher","rarerocketlauncher"}
 
+ra.acceptableGunType = {"pistol","machinepistol","assaultrifle","sniperrifle","shotgun","grenadelauncher","rocketlauncher"}
+
 function init()
 	ra.renameVisible = false
 end
@@ -31,8 +33,8 @@ function ra.isTemplateGun()
 end
 
 function ra.goodGun(itemindex)
-	local guntype =  world.containerItemAt(pane.containerEntityId(), itemindex).name --get weapon name
-	for i,goodtype in ipairs(ra.acceptableGun) do
+	local guntype =  ra.getWeaponType(world.containerItemAt(pane.containerEntityId(), itemindex).name) --get weapon type
+	for i,goodtype in ipairs(ra.acceptableGunType) do
 		if guntype == goodtype then --if weapon name matches any good one - we can work with it
 			return true
 		end
@@ -40,9 +42,31 @@ function ra.goodGun(itemindex)
 	return false
 end
 
+function ra.getWeaponType(name)
+	if not name or type(name) ~= "string" then --if we have some strange name
+		return false
+	end
+	local i1, i2 = string.find(name, "common")
+	if string.find(name, "common") ~= nil and i1 == 1 then
+		local cropname = string.gsub(name, "common", "", 1)
+		return cropname
+	end
+	i1, i2 = string.find(name, "uncommon")
+	if string.find(name, "uncommon") ~= nil and i1 == 1 then
+		local cropname = string.gsub(name, "uncommon", "", 1)
+		return cropname
+	end
+	i1, i2 = string.find(name, "rare")
+	if string.find(name, "rare") ~= nil and i1 == 1 then
+		local cropname = string.gsub(name, "rare", "", 1)
+		return cropname
+	end
+	return false
+end
+
 function ra.sametypeGuns()
-	local modtype =  world.containerItemAt(pane.containerEntityId(), 0).name --get weapon name
-	local templatetype =  world.containerItemAt(pane.containerEntityId(), 1).name --get template weapon name
+	local modtype =  ra.getWeaponType(world.containerItemAt(pane.containerEntityId(), 0).name) --get weapon name
+	local templatetype =  ra.getWeaponType(world.containerItemAt(pane.containerEntityId(), 1).name) --get template weapon name
 	if modtype == templatetype then
 		return true
 	end

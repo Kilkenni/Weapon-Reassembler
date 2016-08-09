@@ -70,9 +70,9 @@ function ra.reconstructGun(msg, something, newName)
 	local modgun = world.containerItemAt(entity.id(), 0)
 	local template = world.containerItemAt(entity.id(), 1)
 	local templatecfg = root.itemConfig(world.containerItemAt(entity.id(), 1))
-	if modgun.name ~= template.name then --modgun.name ~= "commonassaultrifle" or modgun.name ~= template.name then --if not assault rifle or weapon type mismatch
+	--[[if modgun.name ~= template.name then --modgun.name ~= "commonassaultrifle" or modgun.name ~= template.name then --if not assault rifle or weapon type mismatch
 		return false
-	end
+	end--]]
 	
 	--[[for part,index in pairs(modgun.parameters.animationPartVariants) do
 		sb.logInfo("[HELP DUMP item]"..part.." : "..tostring(index));

@@ -19,7 +19,7 @@ function ra.scanGun(msg, something)
 	for key,value in pairs(modgun) do
 		sb.logInfo("[HELP DUMP gun]"..key.." : "..tostring(value))
 	end
-	for key,value in pairs(modguncfg.config.fireSounds) do
+	for key,value in pairs(modguncfg.config) do
 		sb.logInfo("[HELP DUMP cfg.config]"..key.." : "..tostring(value))
 	end
 	return true
@@ -35,6 +35,7 @@ function ra.renameGun(msg, something, newName)
 
 	local item = world.containerTakeAt(entity.id(), 0) 
 	item.parameters.shortdescription = newName
+	item.parameters.tooltipKind = "ra_guncustom"
 	for key,value in pairs(item) do
 		sb.logInfo("[HELP DUMP ]"..key.." : "..tostring(value));
 	end

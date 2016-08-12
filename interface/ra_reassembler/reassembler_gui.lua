@@ -116,6 +116,13 @@ function ra.scanButton(widgetName)
 		return false
 	end
 	world.sendEntityMessage(pane.containerEntityId(), "scanGun")
+	local modguncfg = root.itemConfig(world.containerItemAt(pane.containerEntityId(), 0))
+	widget.setImage("ra_gunImage",modguncfg.parameters.animationParts.butt) 
+	widget.playSound("/sfx/interface/scan.ogg")
+end
+
+function ra.debugButton(widgetName)
+	world.sendEntityMessage(pane.containerEntityId(), "debugInfo")
 	widget.playSound("/sfx/interface/scan.ogg")
 end
 

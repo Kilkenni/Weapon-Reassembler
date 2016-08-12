@@ -8,6 +8,7 @@ function init()
 	message.setHandler("renameGun", ra.renameGun)
 	message.setHandler("reconstructGun", ra.reconstructGun)
 	message.setHandler("resetGun", ra.resetGun)
+	message.setHandler("debugInfo", ra.debugInfo)
 end
 
 function ra.scanGun(msg, something)
@@ -21,6 +22,9 @@ function ra.scanGun(msg, something)
 	end
 	for key,value in pairs(modguncfg.config) do
 		sb.logInfo("[HELP DUMP cfg.config]"..key.." : "..tostring(value))
+	end
+	for key,value in pairs(modguncfg.config.animationParts) do
+		sb.logInfo("[HELP DUMP cfg.config.animationParts]"..key.." : "..tostring(value))
 	end
 	return true
 end
@@ -71,26 +75,60 @@ function ra.reconstructGun(msg, something, newName)
 	local modgun = world.containerItemAt(entity.id(), 0)
 	local template = world.containerItemAt(entity.id(), 1)
 	local templatecfg = root.itemConfig(world.containerItemAt(entity.id(), 1))
-	--[[if modgun.name ~= template.name then --modgun.name ~= "commonassaultrifle" or modgun.name ~= template.name then --if not assault rifle or weapon type mismatch
-		return false
-	end--]]
-	
-	--[[for part,index in pairs(modgun.parameters.animationPartVariants) do
-		sb.logInfo("[HELP DUMP item]"..part.." : "..tostring(index));
-	end
-	for part,index in pairs(template.parameters.animationPartVariants) do
-		sb.logInfo("[HELP DUMP template]"..part.." : "..tostring(index));
-	end]]--
 	
 	modgun.parameters.animationPartVariants = template.parameters.animationPartVariants
-	--modgun.parameters.paletteSwaps = templatecfg.config.paletteSwaps
-	--sb.logInfo("[HELP DUMP item]"..templatecfg.config.paletteSwaps);
-	--[[for part,index in pairs(templatecfg.config.animationCustom) do
-		sb.logInfo("[HELP DUMP templatecfg]"..part.." : "..tostring(index));
-	end]]--
 	construct(modgun.parameters, "animationCustom", "sounds", "fire")
 	modgun.parameters.animationCustom.sounds.fire = templatecfg.config.animationCustom.sounds.fire
 	
 	world.containerPutItemsAt(entity.id(), modgun, 2)
 	world.containerTakeAt(entity.id(), 0)
+end
+
+local function printTable(indent, value)
+    
+end
+
+local function tableLen(T)
+	local count = 0
+	for _ in pairs(T) do count = count + 1 end
+	return count
+end
+
+--Required for printTable
+local function getValueOutput(key ,value)
+    if type(value) == "table" then
+        return "table : "..key;
+    elseif type(value) == "function" then
+        return "function : "..key.."()"
+    elseif type(value) == "string" then
+        return "string : "..key.." - \""..tostring(value).."\"";
+    else
+        return type(value).." : "..key.." - "..tostring(value);
+    end
+end
+
+function ra.debugInfo(msg, something)
+	local indent = 0
+	local value = sb
+	local tabs = ""
+    for i=1,indent,1 do
+        tabs = tabs.."    "
+    end
+    table.sort(value)
+    for k,v in pairs(value) do
+        sb.logInfo(tabs..getValueOutput(k,v))
+        if type(v) == "table" then
+            if tostring(k) == "utf8" then
+                sb.logInfo("    "..tabs.."SKIPPING UTF8 SINCE IT SEEMS TO HAVE NO END AND JUST BE FILLED WITH TABLES OF TABLES")
+            else
+                if tableLen(v) == 0 then
+                    sb.logInfo("    "..tabs.."EMPTY TABLE")
+                else
+                    printTable(indent+1,v)
+                  
+                end
+            end
+            sb.logInfo(" ")
+        end
+    end 
 end

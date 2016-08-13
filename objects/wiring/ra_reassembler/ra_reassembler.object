@@ -41,6 +41,7 @@
 	"frameCooldown" : 5,
 	"autoCloseCooldown" : 10,
 	
-	"scripts" : [ "reassembler.lua", "/scripts/util.lua", "/scripts/vec2.lua" ],
-	"scriptDelta" : 50
+	"scripts" : [ "reassembler.lua" ],
+	//"/scripts/util.lua", "/scripts/vec2.lua"
+	"scriptDelta" : 15
 }

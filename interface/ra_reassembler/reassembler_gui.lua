@@ -1,4 +1,6 @@
 require "/scripts/util.lua"
+require "/scripts/messageutil.lua"
+
 ra = {}
 ra.acceptableGun = {"commonpistol","uncommonpistol","rarepistol","commonmachinepistol","uncommonmachinepistol","raremachinepistol","commonassaultrifle","uncommonassaultrifle","rareassaultrifle","commonsniperrifle","uncommonsniperrifle","raresniperrifle","commonshotgun","uncommonshotgun","rareshotgun","commongrenadelauncher","uncommongrenadelauncher","raregrenadelauncher","commonrocketlauncher","uncommonrocketlauncher","rarerocketlauncher"}
 
@@ -116,13 +118,28 @@ function ra.scanButton(widgetName)
 		return false
 	end
 	world.sendEntityMessage(pane.containerEntityId(), "scanGun")
-	local modguncfg = root.itemConfig(world.containerItemAt(pane.containerEntityId(), 0))
-	widget.setImage("ra_gunImage",modguncfg.parameters.animationParts.butt) 
+	--local modguncfg = root.itemConfig(world.containerItemAt(pane.containerEntityId(), 0))
+	--widget.setImage("ra_gunImage",modguncfg.parameters.animationParts.butt) 
+	widget.setImage("ra_gunImage","/interface/inventory.png") 
 	widget.playSound("/sfx/interface/scan.ogg")
 end
 
 function ra.debugButton(widgetName)
-	world.sendEntityMessage(pane.containerEntityId(), "debugInfo")
+	--world.sendEntityMessage(pane.containerEntityId(), "debugInfo")
+	local deb =  ra_itemIcon
+	--[[for key,value in pairs(item) do
+		sb.logWarn("[HELP WIDGET ]"..key.." : "..tostring(value))
+	end--]]
+	sb.logWarn("[HELP WIDGET ]"..tostring(deb))
+	---[[
+	local dialogConfig = root.assetJson("/interface/confirmation/recruitconfirmation.config")
+	promises:add(player.confirm(dialogConfig), function (choice)
+			if choice then
+				sb.logWarn("[HELP] CONFIRMATION: YES")
+			else
+				sb.logWarn("[HELP] CONFIRMATION: NO!")
+			end
+		end)--]]
 	widget.playSound("/sfx/interface/scan.ogg")
 end
 
@@ -134,4 +151,8 @@ function ra.renameThis(widgetName)
   if newName then
 	world.sendEntityMessage(pane.containerEntityId(), "renameGun", newName)
   end
+end
+
+function update(dt)
+	promises:update()
 end

@@ -84,10 +84,6 @@ function ra.reconstructGun(msg, something, newName)
 	world.containerTakeAt(entity.id(), 0)
 end
 
-local function printTable(indent, value)
-    
-end
-
 local function tableLen(T)
 	local count = 0
 	for _ in pairs(T) do count = count + 1 end

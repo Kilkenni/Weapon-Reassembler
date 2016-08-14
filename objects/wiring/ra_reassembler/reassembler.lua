@@ -26,6 +26,9 @@ function ra.scanGun(msg, something)
 	for key,value in pairs(modguncfg.config.animationParts) do
 		sb.logInfo("[HELP DUMP cfg.config.animationParts]"..key.." : "..tostring(value))
 	end
+	for key,value in pairs(modgun.parameters) do
+		sb.logInfo("[HELP DUMP gun.params]"..key.." : "..tostring(value))
+	end
 	return true
 end
 
@@ -37,13 +40,10 @@ function ra.renameGun(msg, something, newName)
 		return false
 	end
 
-	local item = world.containerTakeAt(entity.id(), 0) 
-	item.parameters.shortdescription = newName
-	item.parameters.tooltipKind = "ra_guncustom"
-	for key,value in pairs(item) do
-		sb.logInfo("[HELP DUMP ]"..key.." : "..tostring(value));
-	end
-	world.containerPutItemsAt(entity.id(), item, 2)
+	local modgun = world.containerTakeAt(entity.id(), 0) 
+	modgun.parameters.shortdescription = newName
+	modgun.parameters.tooltipKind = "ra_guncustom"
+	world.containerPutItemsAt(entity.id(), modgun, 2)
 	return true
 end
 
@@ -68,17 +68,30 @@ function ra.resetGun(msg, something)
 	return true
 end
 
-function ra.reconstructGun(msg, something, newName)
+function ra.reconstructGun(msg, something, copySound, copyAltMode, newName)
 	if not world.containerItemAt(entity.id(), 0) or not world.containerItemAt(entity.id(), 1) or world.containerItemAt(entity.id(), 2) then --if there is no edited gun or no template or output slot is occupied
 		return false
 	end
 	local modgun = world.containerItemAt(entity.id(), 0)
 	local template = world.containerItemAt(entity.id(), 1)
-	local templatecfg = root.itemConfig(world.containerItemAt(entity.id(), 1))
+	local templatecfg = 0
 	
-	modgun.parameters.animationPartVariants = template.parameters.animationPartVariants
-	construct(modgun.parameters, "animationCustom", "sounds", "fire")
-	modgun.parameters.animationCustom.sounds.fire = templatecfg.config.animationCustom.sounds.fire
+	if template then --copy graphics
+		templatecfg = root.itemConfig(world.containerItemAt(entity.id(), 1))
+		modgun.parameters.animationPartVariants = template.parameters.animationPartVariants
+	end
+	
+	if copySound and templatecfg ~=0 then --copy fire sound
+		construct(modgun.parameters, "animationCustom", "sounds", "fire")
+		modgun.parameters.animationCustom.sounds.fire = templatecfg.config.animationCustom.sounds.fire
+	end
+	if copyAltMode and modgun.parameters.altAbilityType and template.parameters.altAbilityType then --copy Alternative Fire mode (weapon types checked in GUI)
+		modgun.parameters.altAbilityType = template.parameters.altAbilityType
+	end
+	if newName then --if renaming
+		--TODO - copy renaming func here
+	end
+	modgun.parameters.tooltipKind = "ra_guncustom" --assigning alt tooltip with "Custom" label
 	
 	world.containerPutItemsAt(entity.id(), modgun, 2)
 	world.containerTakeAt(entity.id(), 0)

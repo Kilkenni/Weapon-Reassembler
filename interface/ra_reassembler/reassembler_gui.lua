@@ -2,9 +2,6 @@ require "/scripts/util.lua"
 require "/scripts/messageutil.lua"
 
 ra = {}
-ra.acceptableGun = {"commonpistol","uncommonpistol","rarepistol","commonmachinepistol","uncommonmachinepistol","raremachinepistol","commonassaultrifle","uncommonassaultrifle","rareassaultrifle","commonsniperrifle","uncommonsniperrifle","raresniperrifle","commonshotgun","uncommonshotgun","rareshotgun","commongrenadelauncher","uncommongrenadelauncher","raregrenadelauncher","commonrocketlauncher","uncommonrocketlauncher","rarerocketlauncher"}
-
-ra.acceptableGunType = {"pistol","machinepistol","assaultrifle","sniperrifle","shotgun","grenadelauncher","rocketlauncher"}
 
 function init()
 	ra.renameVisible = false
@@ -15,6 +12,13 @@ function init()
 
 	self.highlightPulseTimer = 0
 	updateGui()
+	
+	ra.acceptableGun = {"commonpistol","uncommonpistol","rarepistol","commonmachinepistol","uncommonmachinepistol","raremachinepistol","commonassaultrifle","uncommonassaultrifle","rareassaultrifle","commonsniperrifle","uncommonsniperrifle","raresniperrifle","commonshotgun","uncommonshotgun","rareshotgun","commongrenadelauncher","uncommongrenadelauncher","raregrenadelauncher","commonrocketlauncher","uncommonrocketlauncher","rarerocketlauncher"}
+
+	ra.acceptableGunType = {"pistol","machinepistol","assaultrifle","sniperrifle","shotgun","grenadelauncher","rocketlauncher"}
+	ra.rarityTiers = {"common","uncommon","rare","legendary"}
+	ra.craftedTiers = {"iron", "tungsten", "titanium", "durasteel", "aegisalt", "violium", "ferozium"}
+	ra.altModeElemental =  {"lance", "explosiveburst"} --those abilities are elemental-only
 end
 
 function updateGui()
@@ -130,7 +134,19 @@ function ra.reconstructButton(widgetName)
 		return false
 	end
 	
-	local result = world.sendEntityMessage(pane.containerEntityId(), "reconstructGun")
+	local copySound = widget.getChecked("ra_chkSound")
+	local copyAltMode = widget.getChecked("ra_chkAltMode")
+	if copyAltMode then --AltMode checks
+		modguncfg = root.itemConfig(world.containerItemAt(pane.containerEntityId(), 0))
+		template = world.containerItemAt(pane.containerEntityId(), 1)
+		for i = 1, #ra.altModeElemental do --check Elemental blacklist
+			if(ra.altModeElemental[i] == template.parameters.altAbilityType) and modguncfg.config.elementalType == "physical" then --if we copy elem-only mode over physical dmg
+				widget.playSound("/sfx/interface/clickon_error_single.ogg")
+				return false
+			end
+		end
+	end
+	world.sendEntityMessage(pane.containerEntityId(), "reconstructGun", copySound, copyAltMode)
 	widget.playSound("/sfx/objects/penguin_welding4.ogg")
 end
 

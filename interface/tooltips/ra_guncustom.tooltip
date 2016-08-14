@@ -16,6 +16,15 @@
     "hAnchor" : "left",
     "value" : "tree"
   },
+  "ra_customGunLabel" : {
+    "type" : "label",
+    "position" : [131, 153],
+    "hAnchor" : "right",
+    "centered" : true,
+    "wrapWidth" : 126,
+	"value" : "Custom",
+	"color" : "#ffd700"
+  },
   "altAbilityTitleLabel" : {
     "type" : "label",
     "position" : [9, 41],
@@ -71,15 +80,6 @@
     "hAnchor" : "right",
     "centered" : true,
     "wrapWidth" : 126
-  },
-  "customizedLabel" : {
-    "type" : "label",
-    "position" : [90, 142],
-    "hAnchor" : "right",
-    "centered" : true,
-    "wrapWidth" : 126,
-	"value" : "Customized",
-	"color" : "#ffd700"
   },
   "rarityLabel" : {
     "type" : "label",

@@ -9,7 +9,7 @@
 	"price" : 100,
 	"printable" : false,
 	
-	"inventoryIcon" : "/interface/crafting/roboticcraftingtable.png",
+	"inventoryIcon" : "/objects/wiring/ra_reassembler/reassemblericon.png",
 
 	"description" : "Weapon reassembler allows you to edit your weapon's appearance.",
 	"shortdescription" : "^orange;Weapon Reassembler^white;",

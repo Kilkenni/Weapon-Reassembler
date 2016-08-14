@@ -158,11 +158,11 @@ function ra.resetButton(widgetName)
 	local dialogConfig = root.assetJson("/interface/confirmation/reassemblerconfirm.config:gun_reset")
 	promises:add(player.confirm(dialogConfig), function (choice)
 		if choice then
-			sb.logWarn("[HELP] CONFIRMATION: YES")
+			--sb.logWarn("[HELP] CONFIRMATION: YES")
 			widget.playSound("/sfx/objects/cropshipper_box_lock3.ogg")
 			world.sendEntityMessage(pane.containerEntityId(), "resetGun")
 		else
-			sb.logWarn("[HELP] CONFIRMATION: NO!")
+			--sb.logWarn("[HELP] CONFIRMATION: NO")
 		end
 	end)
 	widget.playSound("/sfx/interface/ship_confirm1.ogg")

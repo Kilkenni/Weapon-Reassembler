@@ -9,6 +9,16 @@ function init()
 	message.setHandler("reconstructGun", ra.reconstructGun)
 	message.setHandler("resetGun", ra.resetGun)
 	message.setHandler("debugInfo", ra.debugInfo)
+	self.weaponParts = {"barrel","middle","butt"}
+end
+
+function isWeaponPart(strname) --checks if a string matches any known weapon part
+	for _,part in pairs(self.weaponParts) do
+		if strname == part then
+			return true
+		end
+	end
+	return false
 end
 
 function ra.scanGun(msg, something)
@@ -24,7 +34,10 @@ function ra.scanGun(msg, something)
 		sb.logInfo("[HELP DUMP cfg.config]"..key.." : "..tostring(value))
 	end
 	for key,value in pairs(modguncfg.config.animationParts) do
-		sb.logInfo("[HELP DUMP cfg.config.animationParts]"..key.." : "..tostring(value))
+		sb.logInfo("[HELP DUMP cfg.config.animParts]"..key.." : "..tostring(value))
+	end
+	for key,value in pairs(modguncfg.config.inventoryIcon) do
+		sb.logInfo("[HELP DUMP cfg.config.invIcon]"..key.." : "..tostring(value))
 	end
 	for key,value in pairs(modgun.parameters) do
 		sb.logInfo("[HELP DUMP gun.params]"..key.." : "..tostring(value))
@@ -68,17 +81,43 @@ function ra.resetGun(msg, something)
 	return true
 end
 
+function ra.getAbsImage(path) --removes modifying instructions from the path
+	if not path or type(path) ~= "string" then
+		return false
+	end
+	local i,j = string.find(path, "?") --get first and last index of instructions
+	return string.sub(path,1,i-1) --return the path without instructions
+end
+
 function ra.reconstructGun(msg, something, copySound, copyAltMode, newName)
 	if not world.containerItemAt(entity.id(), 0) or not world.containerItemAt(entity.id(), 1) or world.containerItemAt(entity.id(), 2) then --if there is no edited gun or no template or output slot is occupied
 		return false
 	end
 	local modgun = world.containerItemAt(entity.id(), 0)
+	local modguncfg = root.itemConfig(modgun)
 	local template = world.containerItemAt(entity.id(), 1)
 	local templatecfg = 0
 	
 	if template then --copy graphics
 		templatecfg = root.itemConfig(world.containerItemAt(entity.id(), 1))
-		modgun.parameters.animationPartVariants = template.parameters.animationPartVariants
+		--modgun.parameters.animationPartVariants = template.parameters.animationPartVariants
+		modgun.parameters.animationParts = modgun.parameters.animationParts or {} --COPY weapon visuals
+		for k, v in pairs(templatecfg.config.animationParts) do --iterate on weapon parts
+			if isWeaponPart(k) then --if it IS indeed a weapon part
+				if modguncfg.config.paletteSwaps then --if own palette exists
+					modgun.parameters.animationParts[k] = ra.getAbsImage(v) .. modguncfg.config.paletteSwaps --copy part path + apply own palette
+				else
+					modgun.parameters.animationParts[k] = ra.getAbsImage(v) --else copy with default color
+				end
+			end			
+		end
+		
+		modgun.parameters.inventoryIcon = templatecfg.config.inventoryIcon --COPY icon
+		if modguncfg.config.paletteSwaps then --if own palette exists
+			for k, v in pairs(modgun.parameters.inventoryIcon) do --iterate on icon parts
+				modgun.parameters.inventoryIcon[k].image = ra.getAbsImage(v.image) .. modguncfg.config.paletteSwaps --copy part path + apply own palette
+			end
+		end
 	end
 	
 	if copySound and templatecfg ~=0 then --copy fire sound

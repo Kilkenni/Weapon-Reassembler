@@ -8,6 +8,37 @@ ra.acceptableGunType = {"pistol","machinepistol","assaultrifle","sniperrifle","s
 
 function init()
 	ra.renameVisible = false
+	self.currentUpgrades = {}
+	self.highlightImages = config.getParameter("highlightImages")
+	self.autoRefreshRate = config.getParameter("autoRefreshRate")
+	self.autoRefreshTimer = self.autoRefreshRate --timer for calling updateGui
+
+	self.highlightPulseTimer = 0
+	updateGui()
+end
+
+function updateGui()
+end
+
+function ra.setHighlight(widgetName)
+	self.highlightImage = self.highlightImages[widgetName] or ""
+end
+
+function update(dt)
+	--this command here checks with <dt> interval if the RpcPromises are completed and runs corresponding functions if they are
+	promises:update()
+	
+	self.autoRefreshTimer = math.max(0, self.autoRefreshTimer - dt) --gradually reduce timer every tick
+	if self.autoRefreshTimer == 0 then
+		updateGui()
+		self.autoRefreshTimer = self.autoRefreshRate --reset timer after updateGui is called
+	end
+
+	if self.highlightImage then
+		self.highlightPulseTimer = self.highlightPulseTimer + dt
+		local highlightDirectives = string.format("?multiply=FFFFFF%2x", math.floor((math.cos(self.highlightPulseTimer * 8) * 0.5 + 0.5) * 255))
+		--widget.setImage("imgHighlight", self.highlightImage .. highlightDirectives)
+	end
 end
 
 function ra.isModGun()
@@ -165,9 +196,4 @@ function ra.renameThis(widgetName)
   if newName then
 	world.sendEntityMessage(pane.containerEntityId(), "renameGun", newName)
   end
-end
-
-function update(dt)
-	--this command here checks with <dt> interval if the RpcPromises are completed and runs corresponding functions if they are
-	promises:update()
 end

@@ -108,8 +108,17 @@ function ra.resetButton(widgetName)
 		widget.playSound("/sfx/interface/clickon_error.ogg")
 		return false
 	end
-	world.sendEntityMessage(pane.containerEntityId(), "resetGun")
-	widget.playSound("/sfx/objects/cropshipper_box_lock3.ogg")
+	local dialogConfig = root.assetJson("/interface/confirmation/reassemblerconfirm.config:gun_reset")
+	promises:add(player.confirm(dialogConfig), function (choice)
+		if choice then
+			sb.logWarn("[HELP] CONFIRMATION: YES")
+			widget.playSound("/sfx/objects/cropshipper_box_lock3.ogg")
+			world.sendEntityMessage(pane.containerEntityId(), "resetGun")
+		else
+			sb.logWarn("[HELP] CONFIRMATION: NO!")
+		end
+	end)
+	widget.playSound("/sfx/interface/ship_confirm1.ogg")
 end
 
 function ra.scanButton(widgetName)
@@ -118,9 +127,14 @@ function ra.scanButton(widgetName)
 		return false
 	end
 	world.sendEntityMessage(pane.containerEntityId(), "scanGun")
-	--local modguncfg = root.itemConfig(world.containerItemAt(pane.containerEntityId(), 0))
-	--widget.setImage("ra_gunImage",modguncfg.parameters.animationParts.butt) 
-	widget.setImage("ra_gunImage","/interface/inventory.png") 
+	local modguncfg = root.itemConfig(world.containerItemAt(pane.containerEntityId(), 0))
+	--[[
+	for key,value in pairs(modguncfg.config.animationParts) do
+		sb.logInfo("[HELP DUMP cfg.config]"..key.." : "..tostring(value))
+	end
+	sb.logInfo("[HELP IC ]"..modguncfg.config.animationParts.butt)--]]
+	--sb.logWarn("[HELP IC ]"..key.." : "..type(modguncfg.parameters.animationParts.butt))
+	widget.setImage("ra_gunImage",modguncfg.config.animationParts.butt) 
 	widget.playSound("/sfx/interface/scan.ogg")
 end
 
@@ -132,14 +146,14 @@ function ra.debugButton(widgetName)
 	end--]]
 	sb.logWarn("[HELP WIDGET ]"..tostring(deb))
 	---[[
-	local dialogConfig = root.assetJson("/interface/confirmation/recruitconfirmation.config")
+	local dialogConfig = root.assetJson("/interface/confirmation/reassemblerconfirm.config:gun_reset")
 	promises:add(player.confirm(dialogConfig), function (choice)
-			if choice then
-				sb.logWarn("[HELP] CONFIRMATION: YES")
-			else
-				sb.logWarn("[HELP] CONFIRMATION: NO!")
-			end
-		end)--]]
+		if choice then
+			sb.logWarn("[HELP] CONFIRMATION: YES")
+		else
+			sb.logWarn("[HELP] CONFIRMATION: NO!")
+		end
+	end)--]]
 	widget.playSound("/sfx/interface/scan.ogg")
 end
 
@@ -154,5 +168,6 @@ function ra.renameThis(widgetName)
 end
 
 function update(dt)
+	--this command here checks with <dt> interval if the RpcPromises are completed and runs corresponding functions if they are
 	promises:update()
 end

@@ -5,6 +5,7 @@
 	"race" : "generic",
 	"objectType" : "container",
 	"category" : "Device",
+	"subtitle" : "Create guns from parts",
 
 	"price" : 100,
 	"printable" : false,
@@ -23,15 +24,16 @@
 	"novakidDescription" : "Making guns from other guns? Why in the world didn't I think of it earlier? Probably illegal though.",
 
 	"orientations" : [
-		{
+    {
 		"image" : "reassembler.png:<color>.<frame>",
+		"frames" : 128,
+		"animationCycle" : 10.0,
 
-			"imagePosition" : [0, 0],
-			"frames" : 14,
-			"animationCycle" : 2.4,
+		"imagePosition" : [-8, -8],
 
-			"spaceScan" : 0.1
-		}
+		"spaceScan" : 0.1,
+		"anchors" : [ "bottom" ]
+    }
 	],
 
 	"openSounds" : [ "/sfx/objects/cropshipper_arm_up.ogg" ],

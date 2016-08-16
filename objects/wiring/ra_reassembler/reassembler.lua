@@ -10,6 +10,20 @@ function init()
 	message.setHandler("resetGun", ra.resetGun)
 	message.setHandler("debugInfo", ra.debugInfo)
 	self.weaponParts = {"barrel","middle","butt"}
+	self.palettes = { --dyes dyeColorIndex
+		"", --1 dye remover
+		"", --1 black
+		"", --3 grey
+		"", --4 white
+		"", --5 red
+		"", --6 orange
+		"", --7 yellow
+		"", --8 green
+		"", --9 blue
+		"", --10 purple
+		"", --11 pink
+		"" --12 brown
+	}
 end
 
 function isWeaponPart(strname) --checks if a string matches any known weapon part
@@ -37,7 +51,7 @@ function ra.scanGun(msg, something)
 		sb.logInfo("[HELP DUMP cfg.config.animParts]"..key.." : "..tostring(value))
 	end
 	for key,value in pairs(modguncfg.config.inventoryIcon) do
-		sb.logInfo("[HELP DUMP cfg.config.invIcon]"..key.." : "..tostring(value))
+		sb.logInfo("[HELP DUMP cfg.config.invIcon.pos]"..key.." : "..tostring(value.position))
 	end
 	for key,value in pairs(modgun.parameters) do
 		sb.logInfo("[HELP DUMP gun.params]"..key.." : "..tostring(value))
@@ -85,8 +99,24 @@ function ra.getAbsImage(path) --removes modifying instructions from the path
 	if not path or type(path) ~= "string" then
 		return false
 	end
-	local i,j = string.find(path, "?") --get first and last index of instructions
-	return string.sub(path,1,i-1) --return the path without instructions
+	local i,j = string.find(path, "?") --get first index of instructions
+	if i then
+		return string.sub(path,1,i-1) --return the path without instructions
+	else
+		return false
+	end
+end
+
+function ra.getDirImg(path) --removes image from the path, leaving only instructions
+	if not path or type(path) ~= "string" then
+		return false
+	end
+	local i,j = string.find(path, "?") --get first index of instructions
+	if i then
+		return string.sub(path,i,-1) --return the path without the image
+	else
+		return false
+	end
 end
 
 function ra.reconstructGun(msg, something, copySound, copyAltMode, newName)
@@ -136,6 +166,7 @@ function ra.reconstructGun(msg, something, copySound, copyAltMode, newName)
 	world.containerTakeAt(entity.id(), 0)
 end
 
+--DEBUG LOG PRINT FUNCTIONS
 local function tableLen(T)
 	local count = 0
 	for _ in pairs(T) do count = count + 1 end

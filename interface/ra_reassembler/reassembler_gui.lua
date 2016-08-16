@@ -1,4 +1,5 @@
 require "/scripts/util.lua"
+require "/scripts/vec2.lua"
 require "/scripts/messageutil.lua"
 
 ra = {}
@@ -9,6 +10,7 @@ function init()
 	self.highlightImages = config.getParameter("highlightImages")
 	self.autoRefreshRate = config.getParameter("autoRefreshRate")
 	self.autoRefreshTimer = self.autoRefreshRate --timer for calling updateGui
+	self.gunImageZero = {30,115}
 
 	self.highlightPulseTimer = 0
 	updateGui()
@@ -185,22 +187,61 @@ function ra.scanButton(widgetName)
 	widget.playSound("/sfx/interface/scan.ogg")
 end
 
+function ra.getAbsImage(path) --removes modifying instructions from the path
+	if not path or type(path) ~= "string" then
+		return false
+	end
+	local i,j = string.find(path, "?") --get first index of instructions
+	if i then
+		return string.sub(path,1,i-1) --return the path without instructions
+	else
+		return false
+	end
+end
+
 function ra.debugButton(widgetName)
 	--world.sendEntityMessage(pane.containerEntityId(), "debugInfo")
 	local deb =  ra_itemIcon
-	--[[for key,value in pairs(item) do
+	--[[
+	for key,value in pairs(deb) do
 		sb.logWarn("[HELP WIDGET ]"..key.." : "..tostring(value))
 	end--]]
-	sb.logWarn("[HELP WIDGET ]"..tostring(deb))
-	---[[
-	local dialogConfig = root.assetJson("/interface/confirmation/reassemblerconfirm.config:gun_reset")
-	promises:add(player.confirm(dialogConfig), function (choice)
-		if choice then
-			sb.logWarn("[HELP] CONFIRMATION: YES")
-		else
-			sb.logWarn("[HELP] CONFIRMATION: NO!")
+	--sb.logWarn("[HELP WIDGET ]"..tostring(deb))
+	if ra.isModGun() and ra.goodGun(0) then
+		local modguncfg = root.itemConfig(world.containerItemAt(pane.containerEntityId(), 0)).config
+		if world.containerItemAt(pane.containerEntityId(), 0).parameters.inventoryIcon then
+			modguncfg = world.containerItemAt(pane.containerEntityId(), 0).parameters
 		end
-	end)--]]
+		--local butt = ra.getAbsImage(modguncfg.animationParts.butt)
+		--local middle = ra.getAbsImage(modguncfg.animationParts.middle)
+		--local i, j = string.find()
+		--local tempdir = string.
+		--[[
+		local imagepath = ra.getAbsImage(modguncfg.animationParts.butt) .. "?blend=" .. ra.getAbsImage(modguncfg.animationParts.middle) .. ";13;0"
+		--]]
+		
+		local scale = 2
+		local imagezero = {40,120}
+		local image1pos = { root.imageSize(modguncfg.inventoryIcon[1].image)[1], 0}
+		--modguncfg.inventoryIcon[1].position
+		widget.setImage("ra_gunImage1",modguncfg.inventoryIcon[1].image)
+		widget.setImageScale("ra_gunImage1",scale)
+		--widget.setPosition("ra_gunImage1",vec2.add(self.gunImageZero, vec2.mul(image1pos,scale)))
+		
+		local image2pos = { root.imageSize(modguncfg.inventoryIcon[2].image)[1], 0}
+		--modguncfg.inventoryIcon[2].position
+		widget.setImage("ra_gunImage2",modguncfg.inventoryIcon[2].image)
+		widget.setImageScale("ra_gunImage2",scale)
+		widget.setPosition("ra_gunImage2",vec2.add(self.gunImageZero, vec2.mul(image1pos,scale)))
+		
+		--local image3pos = { root.imageSize(modguncfg.inventoryIcon[3].image)[1], 0}
+		--modguncfg.inventoryIcon[3].position
+		widget.setImage("ra_gunImage3",modguncfg.inventoryIcon[3].image)
+		widget.setImageScale("ra_gunImage3",scale)
+		widget.setPosition("ra_gunImage3",vec2.add(self.gunImageZero, vec2.add(vec2.mul(image1pos,scale),vec2.mul(image2pos,scale))))
+		
+	end
+	
 	widget.playSound("/sfx/interface/scan.ogg")
 end
 

@@ -18,7 +18,7 @@
   },
   "ra_customGunLabel" : {
     "type" : "label",
-    "position" : [131, 153],
+    "position" : [135, 153],
     "hAnchor" : "right",
     "centered" : true,
     "wrapWidth" : 126,

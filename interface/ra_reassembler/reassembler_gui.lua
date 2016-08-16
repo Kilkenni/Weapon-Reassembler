@@ -60,12 +60,24 @@ function updateGui()
 				gunimage = templateguncfg.config.inventoryIcon
 			end
 			if modguncfg.config.paletteSwaps then --if native palette exists - recolor accordingly
-				for i=1,3,1 do
-					gunimage[i].image = ra.getAbsImage(gunimage[i].image) .. modguncfg.config.paletteSwaps
+				for i,part in ipairs(gunimage) do
+					part.image = ra.getAbsImage(part.image) .. modguncfg.config.paletteSwaps
 				end
 			end
 		end
-			
+		
+		for i,part in ipairs(gunimage) do --iterate over gunimage array
+			local imgWidget = "ra_gunImage"..tostring(i) --get widget name
+			widget.setImage(imgWidget,part.image)
+			widget.setImageScale(imgWidget,scale)
+			part.position = { root.imageSize(part.image)[1], 0} --calculate size from image part (only X)
+			local imgpos = {0,0}
+			for j=2,i do
+				imgpos = vec2.add(imgpos,gunimage[j-1].position) --sum all previous image parts' sizes
+			end
+			widget.setPosition(imgWidget, vec2.add(self.gunImageZero, vec2.mul(imgpos,scale))) --shift images
+		end
+		--[[
 		local image1size = { root.imageSize(gunimage[1].image)[1], 0}
 		widget.setImage("ra_gunImage1",gunimage[1].image)
 		widget.setImageScale("ra_gunImage1",scale)
@@ -78,6 +90,7 @@ function updateGui()
 		widget.setImage("ra_gunImage3",gunimage[3].image)
 		widget.setImageScale("ra_gunImage3",scale)
 		widget.setPosition("ra_gunImage3",vec2.add(self.gunImageZero, vec2.mul(vec2.add(image1size,image2size), scale)))
+		--]]
 	else
 		widget.setImage("ra_gunImage1","")
 		widget.setImage("ra_gunImage2","")

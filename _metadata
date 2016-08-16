@@ -1,8 +1,8 @@
 {
 	"author" : "MelOzone",
-	"version" : "0.1a",
+	"version" : "0.3alpha",
 	"friendlyName" : "Weapon Reassembler",
 	"name" : "Weapon Reassembler",
 	"link" : "",
-	"description" : "A test mod adding a crafting station to reassemble your weapon in game, changing its drawable (appearance)."
+	"description" : "A test mod adding a crafting station to reassemble your weapon in game, changing its appearance."
 }

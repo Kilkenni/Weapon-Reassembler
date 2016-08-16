@@ -23,6 +23,18 @@ function init()
 	ra.altModeElemental =  {"lance", "explosiveburst"} --those abilities are elemental-only
 end
 
+function ra.getAbsImage(path) --removes modifying instructions from the path
+	if not path or type(path) ~= "string" then
+		return false
+	end
+	local i,j = string.find(path, "?") --get first index of instructions
+	if i then
+		return string.sub(path,1,i-1) --return the path without instructions
+	else
+		return false
+	end
+end
+
 function updateGui()
 	--GUN PREVIEW--
 	---[[
@@ -46,6 +58,11 @@ function updateGui()
 			gunimage = templategun.parameters.inventoryIcon --REAPLCE THIS WITH SEPARATE PARTS COPY
 			if not gunimage then --if there are noimages in the tempalte gun itself
 				gunimage = templateguncfg.config.inventoryIcon
+			end
+			if modguncfg.config.paletteSwaps then --if native palette exists - recolor accordingly
+				for i=1,3,1 do
+					gunimage[i].image = ra.getAbsImage(gunimage[i].image) .. modguncfg.config.paletteSwaps
+				end
 			end
 		end
 			

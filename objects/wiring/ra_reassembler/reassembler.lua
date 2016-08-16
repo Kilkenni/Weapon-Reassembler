@@ -107,18 +107,6 @@ function ra.getAbsImage(path) --removes modifying instructions from the path
 	end
 end
 
-function ra.getDirImg(path) --removes image from the path, leaving only instructions
-	if not path or type(path) ~= "string" then
-		return false
-	end
-	local i,j = string.find(path, "?") --get first index of instructions
-	if i then
-		return string.sub(path,i,-1) --return the path without the image
-	else
-		return false
-	end
-end
-
 function ra.reconstructGun(msg, something, copySound, copyAltMode, newName)
 	if not world.containerItemAt(entity.id(), 0) or not world.containerItemAt(entity.id(), 1) or world.containerItemAt(entity.id(), 2) then --if there is no edited gun or no template or output slot is occupied
 		return false
@@ -162,9 +150,9 @@ function ra.reconstructGun(msg, something, copySound, copyAltMode, newName)
 	
 	if copySound and templatecfg ~=0 then --copy fire sound
 		construct(modgun.parameters, "animationCustom", "sounds", "fire")
-		if template.parameters.animationCustom.sounds.fire then --template has custom sound
+		if template.parameters and template.parameters.animationCustom and template.parameters.animationCustom.sounds and template.parameters.animationCustom.sounds.fire then
 			modgun.parameters.animationCustom.sounds.fire = template.parameters.animationCustom.sounds.fire
-		else --else copy from template's config
+		else --template has no custom sound, copy from  config
 			modgun.parameters.animationCustom.sounds.fire = templatecfg.config.animationCustom.sounds.fire
 		end
 	end

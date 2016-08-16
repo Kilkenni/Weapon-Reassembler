@@ -10,7 +10,7 @@ function init()
 	self.highlightImages = config.getParameter("highlightImages")
 	self.autoRefreshRate = config.getParameter("autoRefreshRate")
 	self.autoRefreshTimer = self.autoRefreshRate --timer for calling updateGui
-	self.gunImageZero = {30,115}
+	self.gunImageZero = {40,85}
 
 	self.highlightPulseTimer = 0
 	updateGui()
@@ -24,6 +24,49 @@ function init()
 end
 
 function updateGui()
+	--GUN PREVIEW--
+	---[[
+	if ra.isModGun() and ra.goodGun(0) then --if there is a modifyable gun
+		local modgun = world.containerItemAt(pane.containerEntityId(), 0)
+		local modguncfg = root.itemConfig(world.containerItemAt(pane.containerEntityId(), 0))
+
+		local templategun 
+		local templateguncfg
+		if ra.isTemplateGun() and ra.goodGun(1) and ra.sametypeGuns() then --if there is a matching template gun
+			templategun = world.containerItemAt(pane.containerEntityId(), 1)
+			templateguncfg = root.itemConfig(world.containerItemAt(pane.containerEntityId(), 1))
+		end
+		
+		local scale = 2
+		local gunimage = modgun.parameters.inventoryIcon --try copy gun's icon images
+		if not gunimage then --if there are none grab them from config
+			gunimage = modguncfg.config.inventoryIcon
+		end
+		if templategun then --if we have a good template gun as well
+			gunimage = templategun.parameters.inventoryIcon --REAPLCE THIS WITH SEPARATE PARTS COPY
+			if not gunimage then --if there are noimages in the tempalte gun itself
+				gunimage = templateguncfg.config.inventoryIcon
+			end
+		end
+			
+		local image1size = { root.imageSize(gunimage[1].image)[1], 0}
+		widget.setImage("ra_gunImage1",gunimage[1].image)
+		widget.setImageScale("ra_gunImage1",scale)
+		
+		local image2size = { root.imageSize(gunimage[2].image)[1], 0}
+		widget.setImage("ra_gunImage2",gunimage[2].image)
+		widget.setImageScale("ra_gunImage2",scale)
+		widget.setPosition("ra_gunImage2",vec2.add(self.gunImageZero, vec2.mul(image1size,scale)))
+		
+		widget.setImage("ra_gunImage3",gunimage[3].image)
+		widget.setImageScale("ra_gunImage3",scale)
+		widget.setPosition("ra_gunImage3",vec2.add(self.gunImageZero, vec2.mul(vec2.add(image1size,image2size), scale)))
+	else
+		widget.setImage("ra_gunImage1","")
+		widget.setImage("ra_gunImage2","")
+		widget.setImage("ra_gunImage3","")
+	end
+	--]]
 end
 
 function ra.setHighlight(widgetName)
@@ -39,6 +82,7 @@ function update(dt)
 		updateGui()
 		self.autoRefreshTimer = self.autoRefreshRate --reset timer after updateGui is called
 	end
+	widget.setText("ra_lblDebug", tostring(self.autoRefreshTimer))
 
 	if self.highlightImage then
 		self.highlightPulseTimer = self.highlightPulseTimer + dt
@@ -73,7 +117,7 @@ end
 
 function ra.goodGun(itemindex)
 	local guntype =  ra.getWeaponType(world.containerItemAt(pane.containerEntityId(), itemindex).name) --get weapon type
-	for i,goodtype in ipairs(ra.acceptableGunType) do
+	for _,goodtype in ipairs(ra.acceptableGunType) do
 		if guntype == goodtype then --if weapon name matches any good one - we can work with it
 			return true
 		end
@@ -201,46 +245,71 @@ end
 
 function ra.debugButton(widgetName)
 	--world.sendEntityMessage(pane.containerEntityId(), "debugInfo")
-	local deb =  ra_itemIcon
+	widget.setVisible("ra_lblDebug", true)
 	--[[
 	for key,value in pairs(deb) do
 		sb.logWarn("[HELP WIDGET ]"..key.." : "..tostring(value))
 	end--]]
 	--sb.logWarn("[HELP WIDGET ]"..tostring(deb))
+	--[[
 	if ra.isModGun() and ra.goodGun(0) then
 		local modguncfg = root.itemConfig(world.containerItemAt(pane.containerEntityId(), 0)).config
 		if world.containerItemAt(pane.containerEntityId(), 0).parameters.inventoryIcon then
 			modguncfg = world.containerItemAt(pane.containerEntityId(), 0).parameters
-		end
-		--local butt = ra.getAbsImage(modguncfg.animationParts.butt)
-		--local middle = ra.getAbsImage(modguncfg.animationParts.middle)
-		--local i, j = string.find()
-		--local tempdir = string.
-		--[[
-		local imagepath = ra.getAbsImage(modguncfg.animationParts.butt) .. "?blend=" .. ra.getAbsImage(modguncfg.animationParts.middle) .. ";13;0"
-		--]]
-		
+		end		
 		local scale = 2
-		local imagezero = {40,120}
-		local image1pos = { root.imageSize(modguncfg.inventoryIcon[1].image)[1], 0}
-		--modguncfg.inventoryIcon[1].position
+		local image1size = { root.imageSize(modguncfg.inventoryIcon[1].image)[1], 0}
 		widget.setImage("ra_gunImage1",modguncfg.inventoryIcon[1].image)
 		widget.setImageScale("ra_gunImage1",scale)
-		--widget.setPosition("ra_gunImage1",vec2.add(self.gunImageZero, vec2.mul(image1pos,scale)))
 		
-		local image2pos = { root.imageSize(modguncfg.inventoryIcon[2].image)[1], 0}
-		--modguncfg.inventoryIcon[2].position
+		local image2size = { root.imageSize(modguncfg.inventoryIcon[2].image)[1], 0}
 		widget.setImage("ra_gunImage2",modguncfg.inventoryIcon[2].image)
 		widget.setImageScale("ra_gunImage2",scale)
-		widget.setPosition("ra_gunImage2",vec2.add(self.gunImageZero, vec2.mul(image1pos,scale)))
+		widget.setPosition("ra_gunImage2",vec2.add(self.gunImageZero, vec2.mul(image1size,scale)))
 		
-		--local image3pos = { root.imageSize(modguncfg.inventoryIcon[3].image)[1], 0}
-		--modguncfg.inventoryIcon[3].position
 		widget.setImage("ra_gunImage3",modguncfg.inventoryIcon[3].image)
 		widget.setImageScale("ra_gunImage3",scale)
-		widget.setPosition("ra_gunImage3",vec2.add(self.gunImageZero, vec2.add(vec2.mul(image1pos,scale),vec2.mul(image2pos,scale))))
-		
+		widget.setPosition("ra_gunImage3",vec2.add(self.gunImageZero, vec2.mul(vec2.add(image1size,image2size), scale)))		
 	end
+	--]]
+	---[[
+	if ra.isModGun() and ra.goodGun(0) then --if there is a modifyable gun
+		local modgun = world.containerItemAt(pane.containerEntityId(), 0)
+		local modguncfg = root.itemConfig(world.containerItemAt(pane.containerEntityId(), 0))
+
+		local templategun 
+		local templateguncfg
+		if ra.isTemplateGun() and ra.goodGun(1) and ra.sametypeGuns() then --if there is a matching template gun
+			templategun = world.containerItemAt(pane.containerEntityId(), 1)
+			templateguncfg = root.itemConfig(world.containerItemAt(pane.containerEntityId(), 1))
+		end
+		
+		local scale = 2
+		local gunimage = modgun.parameters.inventoryIcon --try copy gun's icon images
+		if not gunimage then --if there are none grab them from config
+			gunimage = modguncfg.config.inventoryIcon
+		end
+		if templategun then --if we have a good template gun as well
+			gunimage = templategun.parameters.inventoryIcon --REAPLCE THIS WITH SEPARATE PARTS COPY
+			if not gunimage then --if there are noimages in the tempalte gun itself
+				gunimage = templateguncfg.config.inventoryIcon
+			end
+		end
+			
+		local image1size = { root.imageSize(gunimage[1].image)[1], 0}
+		widget.setImage("ra_gunImage1",gunimage[1].image)
+		widget.setImageScale("ra_gunImage1",scale)
+		
+		local image2size = { root.imageSize(gunimage[2].image)[1], 0}
+		widget.setImage("ra_gunImage2",gunimage[2].image)
+		widget.setImageScale("ra_gunImage2",scale)
+		widget.setPosition("ra_gunImage2",vec2.add(self.gunImageZero, vec2.mul(image1size,scale)))
+		
+		widget.setImage("ra_gunImage3",gunimage[3].image)
+		widget.setImageScale("ra_gunImage3",scale)
+		widget.setPosition("ra_gunImage3",vec2.add(self.gunImageZero, vec2.mul(vec2.add(image1size,image2size), scale)))
+	end
+	--]]
 	
 	widget.playSound("/sfx/interface/scan.ogg")
 end

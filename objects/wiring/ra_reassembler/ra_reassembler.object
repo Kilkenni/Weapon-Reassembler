@@ -14,13 +14,13 @@
 	"description" : "Weapon reassembler allows you to edit your weapon's appearance.",
 	"shortdescription" : "^orange;Weapon Reassembler^white;",
 
-	"apexDescription" : "A table with a bunch of tools for a craftsman.",
-	"avianDescription" : "A chance to display one's ability to create.",
-	"floranDescription" : "Floran ussse table. Make nice thingss.",
-	"glitchDescription" : "Inspired. Crafting module activated.",
-	"humanDescription" : "I can use materials I've found here to create new things.",
-	"hylotlDescription" : "A chance to create.",
-	"novakidDescription" : "I can use materials I've found here to create new things.",
+	"apexDescription" : "Forbidden by Miniknog orders. Big Ape is serious about IP rights. I can still... experiment on this, right?",
+	"avianDescription" : "Capable of completely rebuilding the weapon in other's likeness. Impressive.",
+	"floranDescription" : "Floran makesss weapon from scrappps. Shapessss it to one's dreamssss. Then it's ssstab time!",
+	"glitchDescription" : "Impressed. This machine reminds me of our family reproduction facilities.",
+	"humanDescription" : "I hope I won't get jailed for jailbreaking. Wait, what?",
+	"hylotlDescription" : "Somewhat reduces the value of weaponcraft. Still, quite useful.",
+	"novakidDescription" : "Making guns from other guns? Why in the world didn't I think of it earlier? Probably illegal though.",
 
 	"orientations" : [
 		{

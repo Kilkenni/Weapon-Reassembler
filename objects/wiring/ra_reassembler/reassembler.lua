@@ -132,7 +132,12 @@ function ra.reconstructGun(msg, something, copySound, copyAltMode, newName)
 		templatecfg = root.itemConfig(world.containerItemAt(entity.id(), 1))
 		--modgun.parameters.animationPartVariants = template.parameters.animationPartVariants
 		modgun.parameters.animationParts = modgun.parameters.animationParts or {} --COPY weapon visuals
-		for k, v in pairs(templatecfg.config.animationParts) do --iterate on weapon parts
+		local copyfrom = templatecfg.config.animationParts
+		if template.parameters.animationParts then --template has custom graphics already
+			copyfrom = template.parameters.animationParts
+		end
+					
+		for k, v in pairs(copyfrom) do --iterate on weapon parts
 			if isWeaponPart(k) then --if it IS indeed a weapon part
 				if modguncfg.config.paletteSwaps then --if own palette exists
 					modgun.parameters.animationParts[k] = ra.getAbsImage(v) .. modguncfg.config.paletteSwaps --copy part path + apply own palette
@@ -142,7 +147,12 @@ function ra.reconstructGun(msg, something, copySound, copyAltMode, newName)
 			end			
 		end
 		
-		modgun.parameters.inventoryIcon = templatecfg.config.inventoryIcon --COPY icon
+		copyfrom = templatecfg.config.inventoryIcon
+		if template.parameters.inventoryIcon then --template has custom icon
+			copyfrom = template.parameters.inventoryIcon
+		end
+		
+		modgun.parameters.inventoryIcon = copyfrom --COPY icon
 		if modguncfg.config.paletteSwaps then --if own palette exists
 			for k, v in pairs(modgun.parameters.inventoryIcon) do --iterate on icon parts
 				modgun.parameters.inventoryIcon[k].image = ra.getAbsImage(v.image) .. modguncfg.config.paletteSwaps --copy part path + apply own palette
@@ -152,7 +162,11 @@ function ra.reconstructGun(msg, something, copySound, copyAltMode, newName)
 	
 	if copySound and templatecfg ~=0 then --copy fire sound
 		construct(modgun.parameters, "animationCustom", "sounds", "fire")
-		modgun.parameters.animationCustom.sounds.fire = templatecfg.config.animationCustom.sounds.fire
+		if template.parameters.animationCustom.sounds.fire then --template has custom sound
+			modgun.parameters.animationCustom.sounds.fire = template.parameters.animationCustom.sounds.fire
+		else --else copy from template's config
+			modgun.parameters.animationCustom.sounds.fire = templatecfg.config.animationCustom.sounds.fire
+		end
 	end
 	if copyAltMode and modgun.parameters.altAbilityType and template.parameters.altAbilityType then --copy Alternative Fire mode (weapon types checked in GUI)
 		modgun.parameters.altAbilityType = template.parameters.altAbilityType

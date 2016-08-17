@@ -55,17 +55,31 @@ function updateGui()
 			gunimage = modguncfg.config.inventoryIcon
 		end
 		if templategun then --if we have a good template gun as well
-			gunimage = templategun.parameters.inventoryIcon --REAPLCE THIS WITH SEPARATE PARTS COPY
-			if not gunimage then --if there are noimages in the tempalte gun itself
+			for i,part in ipairs(gunimage) do --iterate weapon parts, max i = 3
+				local checkname = "ra_chkPart"..tostring(i)
+				if widget.getChecked(checkname) then --if we need to copy that part
+					if templategun.parameters.inventoryIcon then --if there are custom parts in template
+						gunimage[i] = templategun.parameters.inventoryIcon[i] --try copying part i
+					else --if template uses only vanilla parts
+						gunimage[i] = templateguncfg.config.inventoryIcon[i] --copy from config (vanilla part)
+					end
+					if not gunimage[i] then --if no custom part in template with this index => we copied nil
+						gunimage[i] = templateguncfg.config.inventoryIcon[i] --copy from config (vanilla part)
+					end
+				end
+			end
+			--[[
+			if not gunimage then --if there are no images in the tempalte gun itself
 				gunimage = templateguncfg.config.inventoryIcon
 			end
+			--]]
 			if modguncfg.config.paletteSwaps then --if native palette exists - recolor accordingly
 				for i,part in ipairs(gunimage) do
 					part.image = ra.getAbsImage(part.image) .. modguncfg.config.paletteSwaps
 				end
 			end
 		end
-		
+		--Drawing preview
 		for i,part in ipairs(gunimage) do --iterate over gunimage array
 			local imgWidget = "ra_gunImage"..tostring(i) --get widget name
 			widget.setImage(imgWidget,part.image)

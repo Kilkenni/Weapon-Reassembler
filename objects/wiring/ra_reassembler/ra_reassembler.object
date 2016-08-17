@@ -38,7 +38,7 @@
 
 	"openSounds" : [ "/sfx/objects/cropshipper_arm_up.ogg" ],
 	"closeSounds" : [ "/sfx/objects/cropshipper_arm_down.ogg" ],
-	"slotCount" : 4,
+	"slotCount" : 6,
 	"uiConfig" : "/interface/ra_reassembler/reassembler.config",
 	"frameCooldown" : 5,
 	"autoCloseCooldown" : 10,

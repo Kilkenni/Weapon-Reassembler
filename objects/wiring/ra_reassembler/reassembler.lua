@@ -120,7 +120,7 @@ function ra.reconstructGun(msg, something, copySound, copyAltMode, newName)
 		templatecfg = root.itemConfig(world.containerItemAt(entity.id(), 1))
 		--modgun.parameters.animationPartVariants = template.parameters.animationPartVariants
 		modgun.parameters.animationParts = modgun.parameters.animationParts or {} --COPY weapon visuals
-		local copyfrom = templatecfg.config.animationParts
+		local copyfrom = templatecfg.config.animationParts --CHANGE here for separate parts
 		if template.parameters.animationParts then --template has custom graphics already
 			copyfrom = template.parameters.animationParts
 		end
@@ -135,7 +135,7 @@ function ra.reconstructGun(msg, something, copySound, copyAltMode, newName)
 			end			
 		end
 		
-		copyfrom = templatecfg.config.inventoryIcon
+		copyfrom = templatecfg.config.inventoryIcon --CHANGE here for separate parts
 		if template.parameters.inventoryIcon then --template has custom icon
 			copyfrom = template.parameters.inventoryIcon
 		end

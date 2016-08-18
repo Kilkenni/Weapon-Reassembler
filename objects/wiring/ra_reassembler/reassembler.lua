@@ -134,6 +134,7 @@ function ra.reconstructGun(msg, something, copySound, copyAltMode, newName)
 				end
 			end			
 		end
+		modgun.parameters.animationPartVariants = template.parameters.animationPartVariants
 		
 		copyfrom = templatecfg.config.inventoryIcon --CHANGE here for separate parts
 		if template.parameters.inventoryIcon then --template has custom icon

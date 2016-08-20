@@ -3,7 +3,7 @@ A mod for tinkering with boomsticks in Starbound. Does not change the stats. Or 
 
 ## TODO:
 
-- Option to copy single weapon part visuals
+- [DONE!] Option to copy single weapon part visuals
 - [DONE!] Compatible common/uncommon/rare weapons
 - [DONE!] Optional sound replication
 - Randomly generated melee weapons

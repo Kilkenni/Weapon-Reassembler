@@ -1,5 +1,6 @@
 --require "/scripts/staticrandom.lua"
 require "/scripts/util.lua"
+require "/scripts/vec2.lua"
 
 ra = {}
 
@@ -9,7 +10,7 @@ function init()
 	message.setHandler("reconstructGun", ra.reconstructGun)
 	message.setHandler("resetGun", ra.resetGun)
 	message.setHandler("debugInfo", ra.debugInfo)
-	self.weaponParts = {"barrel","middle","butt"}
+	self.weaponParts = {"butt","middle","barrel"} --1 - butt,2 - middle,3 - barrel
 	self.palettes = { --dyes dyeColorIndex
 		"", --1 dye remover
 		"", --1 black
@@ -27,9 +28,9 @@ function init()
 end
 
 function isWeaponPart(strname) --checks if a string matches any known weapon part
-	for _,part in pairs(self.weaponParts) do
+	for i,part in pairs(self.weaponParts) do --check gun parts
 		if strname == part then
-			return true
+			return i --1 - butt, 2 - middle, 3 - barrel
 		end
 	end
 	return false
@@ -41,6 +42,9 @@ function ra.scanGun(msg, something)
 	end
 	local modguncfg = root.itemConfig(world.containerItemAt(entity.id(), 0))
 	local modgun = world.containerItemAt(entity.id(), 0)
+	local nudefloran = "```````````````..```.`......`````````````.``,#:::;#........`......`````````\n`````````````````````......`````````````.'##+:#:::+..............``````````\n``````````````````````.....```````````,#;:;;::;+;:;:##.....`.....``````````\n```````````````````````.....`````````#;:::::::::'+;#::+.```.....```````````\n```````````````````````.....```````.#::::::;;++''+##;'+;```...`````````````\n````````````````````````....``````,+:::::;'':::;:::#+#:;```````````````````\n````````````````````````...``````,'::::;:'::::::::'::::++``````````````````\n..```````````````````````..`````;'::::;;'::::::::'';;::::#.```.````````````\n.`````````````````````......```#+;;;:;:+::::::::;;,#;;::::'````````````````\n.```````````````````````.....``.``##++#:::::::;;',,+:;:::::````````````````\n..``.```````````````````,+.``.````++;+,::::::;;+,,,##;:::::#```````````````\n....``````````````````.##+##``````;;++:::::::'#+''++:+;:::::.``````````````\n.....``````````````,##+@'#''`````#'+#:::::::'#:,,,,,#':;::::+``````````````\n......````````````+;''+#+#+#````.''++:::::;'':''###,;;+;::;:+``````````````\n......```````````''+###+#++;````'++#;::;;:#;,'@####,'++#';::'``````````````\n.....```````````.#'+#++#+++````.,;#;::;;#';,,++.##';:'###+;;;.`````````````\n....`.`````````,#''#++#+@``.```.`+';'##+;:,,,@###',,'';;;'#:;'`````````````\n....``````````+#''+####+##.````..#'+#'';,,,,,#';,,,:##;:;:#'#:`````````````\n....`````````'''''+++#++'+`````;':;'#;,,,,,,,,,,,,,;#+;:#;#`.`,````````````\n...``````````;'''##++++++',`````;##'+;,,,,,,,,,,,,:#:';:+:'.`....``````````\n.```````````#'''##+++###+'#`````::;##':,,,,,,,,,,,++:';;;,'.`...`;;``.`````\n```````````.#++#+++##+`;+'.``````#::'#;,;,,,,,,'::#;;'#;````.....##,,.`````\n``````````:':###++#++@'#+@````.```,+;:'###+;+,;;+:;#:;'+````....``.`+;,````\n`````````.;#;';#+##++###+#````````#'++#,##+#:;,+###::#..```......`````,````\n````````,'+;+'''`++++++'#@`````````'#'';,,,;,+####:+';@.```....`##;+,.#@```\n````````###;'@+```#+++##'@``````.`#;;'+#,,'@+::#####@+.````...``#@+#:';;.,`\n```````@'';#+;#```.`,.`@+@`````````,#;+##;:;;:#;#'';;'#.``;+',..;``````````\n``````''''++;;#````````###`````::;``.+:'+###@';#+';+':,...`........`.``````\n``````+''''+###.````.``#+#``'#''''+``,;#;;'':'#@'';;'...............```````\n.````';''+''++#`+.@#@#@+#'##;;;;;''#+###+####+'@;;#;;'..............````.``\n.````+;''+''++##:#:#'#+###++''''++#'#''#'''#'##'.;'.``..............```````\n..``:''''#++++##;#;##+'+##+''#';;''#'##+'''#'+#'+.``................```````\n.```@;'''#+++++#;#;#+#++##+##'';;'######'''#'''#+#####,............````````\n````+''''+++++##+###''++##;#'''''###'++#'''''#''###'''##...........`..``.``\n.```+''''+++++#####'+'#+##++#''++''+'+#''''+'+##+#++#+'+#.............`````\n```+''''#++++#''#++#''###'#'+#++'''''##+++####+++#';''#''#.............````\n```@'''+'++++++#+'++'###+'#''+#'';'''##++;';'''#+#;;;'#''#,...........`````\n````#++''++#++#''+#''###+++###';;;'''#';';;;'''#'#'';;''''#.............```\n````.#@@@##@:#''++#+'++######'';;;'+';';;;;;'''#'#'';'''''@.............```\n````````````@''+'#''##+#..#+;'';;''+#+';;;;;'''+'#+'''''''@............````\n``````````+#@'''+#+'#@+#.#;';';'''#++';;';;''''+'#'+''''''#............``.`\n``````.```#+''''#;'++++'#;;;;;;'''##;;;;::;''''++#++++''''+:.............``\n``````,+`#'+'''++'''+++#'';;;;;'''#;;;;'';;:''++###'+''''''#@............`.\n```@``#';''''''+'''+#+#+''';;;;''''';;;;:;'''''#+###'+'+'+@:+;.............\n``.;''''''''''#'''++###+'';;;;'''#';;;;'';;''''#+###++'#+@';@;:............\n``.`+'''''''+#+'''++++##+''';'''+#';;;;;;;;''''#####+'###+'@;;@@...........\n..`#'''''''+++'''+++++##++''''''#+'';;;'';'''''##+@###'+'#@;;#:;+..........\n``;'''''''+++''''++##++++++'''++#+'';;'+;;#'''+#+##,##+'###;@''#;#.........\n.`#'''''+'++''''+++##++##+++++++#++''''+##'''+#++#,,,@+'+##@#;#;'+@........\n`++';'+'++++''''++###+#+;#+++++++'+'''''''''++###:,,,,##''####;;@:#@.......\n``,''#+++++''''+'+##+;+#.,###'';+''++'+++++++#+#',,,,,,#+''##@##;##':......\n,'''#+++++''''++'+'#+@....#'#'';';''++++++++###@,,,,,,,,@+#'+#'#+@;#;......\n',###'++'+;'''+''#'+#;:...''+'';';;'''#########,,,,,,,,,,@#;'+#+###+#......\n..#.`'++'#'''+'''@;,+.....;'''';'';;;'''##++###,,,,,,,,,,,#+''####++#@'....\n``.`.:+;'''''''@@.`.+..``.,'''';''''''''''++##@,,,,,,,,,,,,#++#++++@@##;...\n.``,''@''''''+##.......``..++'';''''''''++++##:,,,,,,,,,,,,,;#+++@@@'+++,.,\n.`';;'';''''+'+`.....```...##'''#'''''''#+++#@,,,,,,,,,,,,,,,,#+@+'+'+'+#.,\n`.'...,'''''+'`....`````...#''''#''''''#'++##,,,,,,,,,,,,,,,,,,@++'+'++++;,\n.....:;,'''+'#+....`````...:'#''+;'''''++++#+,,,,,,,,,,,,,,,,,,@+';#'++++#,\n`.....``'''+'#+....````.....#+;'#'''''#+++++,,,,,,,,,,,,,,,,,,,@+;;#'++++;,\n........'''''++...```..``...#;''+#'''++++#+#,,,,,,,,,,,,,,,,,,,@'''#''+++,,\n........;'''':#...````.`...++#'#:'''+++''+++',,,,,,,,,,,,,,,,,.#'''@'++++.,\n........''''''.,,.,`......,##'#;;:#''''+'##+#,,,,,,,,,,,,,,,,,.++''+'+++#.,\n.......;`''#':,,,,,,.,....####::;:+'''#'+'#++#;,,,,,,,,,,,,,,,,++;'''+++@,,\n"
+	--this is a magic string, don't touch it. The author can be found on guoh-art.tumblr.com. Go hug him.
+	sb.logInfo(nudefloran)
 	for key,value in pairs(modgun) do
 		sb.logInfo("[HELP DUMP gun]"..key.." : "..tostring(value))
 	end
@@ -51,7 +55,7 @@ function ra.scanGun(msg, something)
 		sb.logInfo("[HELP DUMP cfg.config.animParts]"..key.." : "..tostring(value))
 	end
 	for key,value in pairs(modguncfg.config.inventoryIcon) do
-		sb.logInfo("[HELP DUMP cfg.config.invIcon.pos]"..key.." : "..tostring(value.position))
+		sb.logInfo("[HELP DUMP cfg.config.invIcon]"..key.." : "..tostring(value))
 	end
 	for key,value in pairs(modgun.parameters) do
 		sb.logInfo("[HELP DUMP gun.params]"..key.." : "..tostring(value))
@@ -83,11 +87,7 @@ function ra.resetGun(msg, something)
 	local resetseed = modguncfg.parameters.seed
 	local resetlevel = modguncfg.parameters.level
 	local resetgun_template = world.containerItemAt(entity.id(), 0)
-	--[[for key,value in pairs(resetgun_template) do
-		if key ~= "count" and key ~= "name" then
-			key=nil
-		end
-	end]]--
+
 	resetgun_template.parameters = nil
 	local resetgun = root.createItem(resetgun_template, resetlevel, resetseed)
 	world.containerPutItemsAt(entity.id(), resetgun, 2)
@@ -107,7 +107,7 @@ function ra.getAbsImage(path) --removes modifying instructions from the path
 	end
 end
 
-function ra.reconstructGun(msg, something, copySound, copyAltMode, newName)
+function ra.reconstructGun(msg, something, copyParts, copySound, copyAltMode, newName)
 	if not world.containerItemAt(entity.id(), 0) or not world.containerItemAt(entity.id(), 1) or world.containerItemAt(entity.id(), 2) then --if there is no edited gun or no template or output slot is occupied
 		return false
 	end
@@ -119,34 +119,54 @@ function ra.reconstructGun(msg, something, copySound, copyAltMode, newName)
 	if template then --copy graphics
 		templatecfg = root.itemConfig(world.containerItemAt(entity.id(), 1))
 		--modgun.parameters.animationPartVariants = template.parameters.animationPartVariants
-		modgun.parameters.animationParts = modgun.parameters.animationParts or {} --COPY weapon visuals
+		modgun.parameters.animationParts = modgun.parameters.animationParts or {} --create structure
 		local copyfrom = templatecfg.config.animationParts --CHANGE here for separate parts
 		if template.parameters.animationParts then --template has custom graphics already
 			copyfrom = template.parameters.animationParts
 		end
 					
 		for k, v in pairs(copyfrom) do --iterate on weapon parts
-			if isWeaponPart(k) then --if it IS indeed a weapon part
+			if isWeaponPart(k) then --if it IS indeed a weapon part (there's also a muzzle flash there!)
+				if copyParts[isWeaponPart(k)] then --if we need to copy that part
+					modgun.parameters.animationParts[k] = ra.getAbsImage(v) --copy with default color
+				else --if we don't need it, we still need to copy the existing from config or the game crashes
+					modgun.parameters.animationParts[k] = ra.getAbsImage(modguncfg.config.animationParts[k])
+				end
 				if modguncfg.config.paletteSwaps then --if own palette exists
-					modgun.parameters.animationParts[k] = ra.getAbsImage(v) .. modguncfg.config.paletteSwaps --copy part path + apply own palette
-				else
-					modgun.parameters.animationParts[k] = ra.getAbsImage(v) --else copy with default color
+					modgun.parameters.animationParts[k] = modgun.parameters.animationParts[k] .. modguncfg.config.paletteSwaps -- + apply own palette
 				end
 			end			
 		end
-		modgun.parameters.animationPartVariants = template.parameters.animationPartVariants
-		
-		copyfrom = templatecfg.config.inventoryIcon --CHANGE here for separate parts
-		if template.parameters.inventoryIcon then --template has custom icon
+		for part,value in pairs(template.parameters.animationPartVariants) do --copy indexes to calc size correctly
+			if copyParts[isWeaponPart(part)] then --if we need to copy that part
+				modgun.parameters.animationPartVariants[part] = value
+			end --we don't need to copy existing ones as they always exist even for vanilla guns
+		end
+
+		copyfrom = templatecfg.config.inventoryIcon --first copy config
+		if template.parameters.inventoryIcon then --template has custom icon - copy it instead
 			copyfrom = template.parameters.inventoryIcon
 		end
 		
-		modgun.parameters.inventoryIcon = copyfrom --COPY icon
-		if modguncfg.config.paletteSwaps then --if own palette exists
-			for k, v in pairs(modgun.parameters.inventoryIcon) do --iterate on icon parts
-				modgun.parameters.inventoryIcon[k].image = ra.getAbsImage(v.image) .. modguncfg.config.paletteSwaps --copy part path + apply own palette
+		modgun.parameters.inventoryIcon = modgun.parameters.inventoryIcon or {} --create structure
+		local imageOffset = {0,0}
+		for key, value in pairs(modguncfg.config.inventoryIcon) do
+			if copyParts[key] then --if we need to copy that part
+				modgun.parameters.inventoryIcon[key] = copyfrom[key]
+			else --if we don't, copy it from config to preserve full structure and save game from going bonkers
+				modgun.parameters.inventoryIcon[key] = modguncfg.config.inventoryIcon[key]
+			end
+			local imageSize = root.imageSize(modgun.parameters.inventoryIcon[key].image)
+			imageOffset = vec2.add(imageOffset, {imageSize[1] / 2, 0}) --add half image width
+			modgun.parameters.inventoryIcon[key].position = imageOffset --set part position
+			imageOffset = vec2.add(imageOffset, {imageSize[1] / 2, 0}) --add another half image width
+			if modguncfg.config.paletteSwaps then --if own palette exists (we already have a pic at this step)
+				modgun.parameters.inventoryIcon[key].image = ra.getAbsImage(modgun.parameters.inventoryIcon[key].image) .. modguncfg.config.paletteSwaps -- + apply own palette
 			end
 		end
+		
+		--modgun.parameters.inventoryIcon = copyfrom --COPY icon
+		
 	end
 	
 	if copySound and templatecfg ~=0 then --copy fire sound

@@ -91,20 +91,7 @@ function updateGui()
 			end
 			widget.setPosition(imgWidget, vec2.add(self.gunImageZero, vec2.mul(imgpos,scale))) --shift images
 		end
-		--[[
-		local image1size = { root.imageSize(gunimage[1].image)[1], 0}
-		widget.setImage("ra_gunImage1",gunimage[1].image)
-		widget.setImageScale("ra_gunImage1",scale)
 		
-		local image2size = { root.imageSize(gunimage[2].image)[1], 0}
-		widget.setImage("ra_gunImage2",gunimage[2].image)
-		widget.setImageScale("ra_gunImage2",scale)
-		widget.setPosition("ra_gunImage2",vec2.add(self.gunImageZero, vec2.mul(image1size,scale)))
-		
-		widget.setImage("ra_gunImage3",gunimage[3].image)
-		widget.setImageScale("ra_gunImage3",scale)
-		widget.setPosition("ra_gunImage3",vec2.add(self.gunImageZero, vec2.mul(vec2.add(image1size,image2size), scale)))
-		--]]
 	else
 		widget.setImage("ra_gunImage1","")
 		widget.setImage("ra_gunImage2","")
@@ -161,6 +148,9 @@ end
 
 function ra.goodGun(itemindex)
 	local guntype =  ra.getWeaponType(world.containerItemAt(pane.containerEntityId(), itemindex).name) --get weapon type
+	if not guntype or not ra.acceptableGunType then --if we have null weapon or init isn't complete yet
+		return false
+	end
 	for _,goodtype in ipairs(ra.acceptableGunType) do
 		if guntype == goodtype then --if weapon name matches any good one - we can work with it
 			return true
@@ -236,7 +226,12 @@ function ra.reconstructButton(widgetName)
 			end
 		end
 	end
-	world.sendEntityMessage(pane.containerEntityId(), "reconstructGun", copySound, copyAltMode)
+	local copyParts = {}
+	for i=1, 3 do
+		local chkName = "ra_chkPart"..tostring(i)
+		copyParts[i] = widget.getChecked(chkName)
+	end
+	world.sendEntityMessage(pane.containerEntityId(), "reconstructGun", copyParts, copySound, copyAltMode, nil)
 	widget.playSound("/sfx/objects/penguin_welding4.ogg")
 end
 
@@ -296,25 +291,7 @@ function ra.debugButton(widgetName)
 	end--]]
 	--sb.logWarn("[HELP WIDGET ]"..tostring(deb))
 	--[[
-	if ra.isModGun() and ra.goodGun(0) then
-		local modguncfg = root.itemConfig(world.containerItemAt(pane.containerEntityId(), 0)).config
-		if world.containerItemAt(pane.containerEntityId(), 0).parameters.inventoryIcon then
-			modguncfg = world.containerItemAt(pane.containerEntityId(), 0).parameters
-		end		
-		local scale = 2
-		local image1size = { root.imageSize(modguncfg.inventoryIcon[1].image)[1], 0}
-		widget.setImage("ra_gunImage1",modguncfg.inventoryIcon[1].image)
-		widget.setImageScale("ra_gunImage1",scale)
-		
-		local image2size = { root.imageSize(modguncfg.inventoryIcon[2].image)[1], 0}
-		widget.setImage("ra_gunImage2",modguncfg.inventoryIcon[2].image)
-		widget.setImageScale("ra_gunImage2",scale)
-		widget.setPosition("ra_gunImage2",vec2.add(self.gunImageZero, vec2.mul(image1size,scale)))
-		
-		widget.setImage("ra_gunImage3",modguncfg.inventoryIcon[3].image)
-		widget.setImageScale("ra_gunImage3",scale)
-		widget.setPosition("ra_gunImage3",vec2.add(self.gunImageZero, vec2.mul(vec2.add(image1size,image2size), scale)))		
-	end
+
 	--]]
 	---[[
 	if ra.isModGun() and ra.goodGun(0) then --if there is a modifyable gun

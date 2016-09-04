@@ -25,6 +25,13 @@ function init()
 		"", --11 pink
 		"" --12 brown
 	}
+	self.rangedPalettes = {
+		"red", -- palette option 1
+		"teal", -- option 2, green-blue
+		"orange", -- 3
+		"grey", -- 4
+		"purple" -- 5
+	}
 end
 
 function isWeaponPart(strname) --checks if a string matches any known weapon part

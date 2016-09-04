@@ -12,7 +12,7 @@
 	
 	"inventoryIcon" : "/objects/wiring/ra_reassembler/reassemblericon.png",
 
-	"description" : "Weapon reassembler allows you to edit your weapon's appearance.",
+	"description" : "Weapon reassembler allows one to edit your weapon's appearance.",
 	"shortdescription" : "^orange;Weapon Reassembler^white;",
 
 	"apexDescription" : "Forbidden by Miniknog orders. Big Ape is serious about IP rights. I can still... experiment on this, right?",

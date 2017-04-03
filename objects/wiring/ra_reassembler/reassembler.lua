@@ -11,9 +11,9 @@ function init()
 	message.setHandler("resetGun", ra.resetGun)
 	message.setHandler("debugInfo", ra.debugInfo)
 	self.weaponParts = {"butt","middle","barrel"} --1 - butt,2 - middle,3 - barrel
-	self.palettes = { --dyes dyeColorIndex
+	self.palettes = { --dyes dyeColorIndex+1
 		"", --1 dye remover
-		"", --1 black
+		"", --2 black
 		"", --3 grey
 		"", --4 white
 		"", --5 red

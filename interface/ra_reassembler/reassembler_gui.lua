@@ -453,7 +453,7 @@ function ra.debugButton(widgetName)
 		sb.logInfo("[HELP DUMP gun config]"..key.." : "..tostring(value))
 	end
 	for key,value in pairs(root.itemConfig(world.containerItemAt(pane.containerEntityId(), 0)).config.altAbility) do
-		sb.logInfo("[HELP DUMP gun config.altAbility]"..key.." : "..tostring(value))sb.logError
+		sb.logInfo("[HELP DUMP gun config.altAbility]"..key.." : "..tostring(value))
 	end
 	for key,value in pairs(root.itemConfig(world.containerItemAt(pane.containerEntityId(), 0)).config.altAbility.elementalConfig) do
 		sb.logInfo("[HELP DUMP gun config.altAbility.elementalConfig]"..key.." : "..tostring(value))

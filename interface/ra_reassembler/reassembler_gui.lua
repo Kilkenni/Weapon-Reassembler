@@ -104,25 +104,30 @@ function ra.getAbsImage(path) --removes modifying instructions from the path
 	end
 end
 
+function GetElementalIndex(modgun) --searches elementalTypes table for the element and returns its index
+	if modgun.parameters == nil then --if empty modgun, just to be sure
+		return nil
+	end
+	for index,elemType in pairs(ra.elementalTypes) do
+		if modgun.parameters.elementalType == nil then --if the element is "physical" there is no such field at all; that requires special handling
+			return -1
+		end
+		if modgun.parameters.elementalType == elemType then --if weapon's elem is found
+			return index
+		end
+	end
+end
+
 function SetElementOnce(modgun) --call only when there is a suitable modgun!!
 	if ra.ElementIsSet and (ra.LastWeaponSeed == modgun.parameters.seed) then -- If the Element is already set, do nothing
 		return false
 	else -- Else: set weapon element and save the marker + seed
 		ra.ElementIsSet = true
 		ra.LastWeaponSeed = modgun.parameters.seed
-		for index,elemType in pairs(ra.elementalTypes) do
-			if modgun.parameters.elementalType == nil then
-				widget.setSelectedOption("ra_radioElemental",-1)
-				widget.setText("ra_PriceScrArea.ra_lblDebugText","Radio selected: "..tostring(widget.getSelectedOption("ra_radioElemental")).."\n".."Weapon type: physical".."\n")
-				break
-			end
-			if modgun.parameters.elementalType == elemType then --if weapon's elem is found
-				widget.setSelectedOption("ra_radioElemental",index)
-				-- index: -1: physical, 0: fire, 1: electric, 2: ice, 3: poison
-				widget.setText("ra_PriceScrArea.ra_lblDebugText","Radio selected: "..tostring(widget.getSelectedOption("ra_radioElemental")).."\n".."Weapon type: "..modgun.parameters.elementalType.."\n".."Weapon type index: "..tostring(index))
-				break
-			end
-		end
+		local index = GetElementalIndex(modgun) --calculate elem index in the table
+		widget.setSelectedOption("ra_radioElemental",index) --set this index as a selected option
+		widget.setText("ra_PriceScrArea.ra_lblErrorText","Weapon damage: "..ra.elementalTypes[index].."\n".."Weapon damage index: "..tostring(index))
+		
 		return true
 	end
 end
@@ -143,7 +148,7 @@ function updateGui()
 		
 		
 		SetElementOnce(modgun) -- Set weapon element radiogroup to current elem; called once for every new modgun
-		-- local scale = 2
+		-- local scale = 2 --removed, scale is now a global variable for possible preview zooming
 		local gunimage = modgun.parameters.inventoryIcon --try copy gun's icon images
 		if not gunimage then --if there are none grab them from config
 			gunimage = modguncfg.config.inventoryIcon
@@ -323,34 +328,73 @@ function ra.renameButton(widgetName)
 	widget.focus( ra.renameVisible and "ra_boxRename" or "ra_btnRename" )
 end
 
-function ra.reconstructButton(widgetName)
-	if not ra.isModGun() or not ra.isTemplateGun() or ra.isAssembledGun() then --if there is no gun or no template gun or pick-up slot is occupied
-		widget.playSound("/sfx/interface/clickon_error.ogg")
-		return false
-	end
-	if not ra.goodGun(0) or not ra.sametypeGuns() then --if the gun is not "good" or the guns are different
-		widget.playSound("/sfx/interface/clickon_error_single.ogg")
-		return false
-	end
-	
+function ra.reconstructButton(widgetName)	
+	--Reading modification settings
 	local copySound = widget.getChecked("ra_chkSound")
 	local copyAltMode = widget.getChecked("ra_chkAltMode")
-	if copyAltMode then --AltMode checks
-		modgun = world.containerItemAt(pane.containerEntityId(), 0)
-		template = world.containerItemAt(pane.containerEntityId(), 1)
-		for i = 1, #ra.altModeElemental do --check Elemental blacklist
-			if(ra.altModeElemental[i] == template.parameters.altAbilityType) and modgun.parameters.elementalType == "physical" then --if we copy elem-only mode over physical dmg
-				widget.playSound("/sfx/interface/clickon_error_single.ogg")
-				return false
-			end
-		end
-	end
 	local copyParts = {}
 	for i=1, 3 do
 		local chkName = "ra_chkPart"..tostring(i)
 		copyParts[i] = widget.getChecked(chkName)
 	end
-	world.sendEntityMessage(pane.containerEntityId(), "reconstructGun", copyParts, copySound, copyAltMode, nil)
+	
+	--GUN PRE_CHECKS--
+	if not ra.isModGun() then --if there is no gun to work on
+		widget.playSound("/sfx/interface/clickon_error.ogg")
+		widget.setText("ra_PriceScrArea.ra_lblErrorText",">No gun to modify")
+		return false
+	end
+	if not ra.goodGun(0) then --if the gun is not "good". That's obvious
+		widget.playSound("/sfx/interface/clickon_error_single.ogg")
+		widget.setText("ra_PriceScrArea.ra_lblErrorText",">Unknown weapon vendor\nPossibly not supported")
+		return false
+	end
+	if ra.isAssembledGun() then --if the pick-up slot is occupied
+		widget.playSound("/sfx/interface/clickon_error.ogg")
+		widget.setText("ra_PriceScrArea.ra_lblErrorText",">Output slot not empty")
+		return false
+	end
+	if copySound or copyAltMode or copyParts[1] or copyParts[2] or copyParts[3] then --any of the options requiring template is checked
+		if not ra.isTemplateGun() or not ra.sametypeGuns() then --no template gun or gun type mismatch 
+			widget.playSound("/sfx/interface/clickon_error.ogg")
+			widget.setText("ra_PriceScrArea.ra_lblErrorText",">No template gun\nor gun type mismatch")
+			return false
+		end
+	end
+
+	--FIRIN' UP--
+	local modgun = world.containerItemAt(pane.containerEntityId(), 0)
+	local template = world.containerItemAt(pane.containerEntityId(), 1)
+	
+	if copyAltMode then --AltMode check if it is modified
+		for i = 1, #ra.altModeElemental do --check Elemental blacklist
+			if (template.parameters.altAbilityType == ra.altModeElemental[i]) and --[[modgun.parameters.elementalType]] ra.elementalTypes[widget.getSelectedOption("ra_radioElemental")] == "physical" then --if we copy elem-only mode over physical dmg
+				widget.playSound("/sfx/interface/clickon_error_single.ogg")
+				widget.setText("ra_PriceScrArea.ra_lblErrorText",">New altMode is\n locked to elemental")
+				return false
+			end
+		end
+	else --AltMode check if it stays the same but the element is modified instead
+		for i = 1, #ra.altModeElemental do --check Elemental blacklist
+			if (modgun.parameters.altAbilityType == ra.altModeElemental[i]) and ra.elementalTypes[widget.getSelectedOption("ra_radioElemental")] == "physical" then --if we try to set physical damage on a weapon with elem-only altMode
+				widget.playSound("/sfx/interface/clickon_error_single.ogg")
+				widget.setText("ra_PriceScrArea.ra_lblErrorText",">Current altMode is\n locked to elemental")
+				return false
+			end
+		end
+	end
+	
+	local newElement
+	SetElementOnce(modgun) --to ensure we have our weapon element done right we'll call this one more time
+	--if the player changed the element manually but it was properly read at first during updateGui(), the marker IsSet is already true, so this should not be a problem... theoretically
+	if widget.getSelectedOption("ra_radioElemental") ~= GetElementalIndex(modgun) then
+	-- if the selected option does not match the current weapon element: remember the selected (new) one
+		newElement = ra.elementalTypes[widget.getSelectedOption("ra_radioElemental")] --set TEXT (!) value
+	else
+		newElement = nil --otherwise: disregard it
+	end
+	
+	world.sendEntityMessage(pane.containerEntityId(), "reconstructGun", copyParts, copySound, copyAltMode, newElement, nil)
 	widget.playSound("/sfx/objects/penguin_welding4.ogg")
 end
 
@@ -397,15 +441,24 @@ function ra.debugButton(widgetName)
 		sb.logInfo("[HELP DUMP dye.config]"..key.." : "..tostring(value))
 	end
 	--]]
+	for key,value in pairs((world.containerItemAt(pane.containerEntityId(), 0))) do
+		sb.logInfo("[HELP DUMP gun]"..key.." : "..tostring(value))
+	end
 	for key,value in pairs((world.containerItemAt(pane.containerEntityId(), 0)).parameters) do
 		sb.logInfo("[HELP DUMP gun params]"..key.." : "..tostring(value))
 	end
 	
-	--[[
-	for key,value in pairs(root.itemConfig(world.containerItemAt(pane.containerEntityId(), 0))) do
+
+	for key,value in pairs(root.itemConfig(world.containerItemAt(pane.containerEntityId(), 0)).config) do
 		sb.logInfo("[HELP DUMP gun config]"..key.." : "..tostring(value))
 	end
-	]]--
+	for key,value in pairs(root.itemConfig(world.containerItemAt(pane.containerEntityId(), 0)).config.altAbility) do
+		sb.logInfo("[HELP DUMP gun config.altAbility]"..key.." : "..tostring(value))sb.logError
+	end
+	for key,value in pairs(root.itemConfig(world.containerItemAt(pane.containerEntityId(), 0)).config.altAbility.elementalConfig) do
+		sb.logInfo("[HELP DUMP gun config.altAbility.elementalConfig]"..key.." : "..tostring(value))
+	end
+	
 	--sb.logWarn("[PALETTE INDEX  ]"..dyeIndex)
 	
 	--local dyeIndex = root.itemConfig(world.containerItemAt(pane.containerEntityId(), 3)).config.dyeColorIndex

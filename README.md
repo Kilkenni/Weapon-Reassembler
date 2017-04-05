@@ -15,5 +15,8 @@ A mod for tinkering with boomsticks in Starbound. Does not change the stats. Or 
 - Changing weapon element (will cost resources)
 - Changing weapon projectile type (for grenade launchers etc) (will cost resources)
 - Changing weapon's alt mode (will cost resources & probably destroy the template)
+- Zoomable preview
+- Show estimated reassembling price
+- Show completed modifications for a given weapon
 - Upgrading weapon stats (will cost resources, will be limited - you won't be able to use a low-tier gun through the entire game)
 - lulz

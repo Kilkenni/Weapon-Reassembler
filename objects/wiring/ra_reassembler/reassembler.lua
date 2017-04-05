@@ -114,8 +114,9 @@ function ra.getAbsImage(path) --removes modifying instructions from the path
 	end
 end
 
-function ra.reconstructGun(msg, something, copyParts, copySound, copyAltMode, newName)
-	if not world.containerItemAt(entity.id(), 0) or not world.containerItemAt(entity.id(), 1) or world.containerItemAt(entity.id(), 2) then --if there is no edited gun or no template or output slot is occupied
+function ra.reconstructGun(msg, something, copyParts, copySound, copyAltMode, newElement, newName)
+	if not world.containerItemAt(entity.id(), 0) --[[or not world.containerItemAt(entity.id(), 1)]] or world.containerItemAt(entity.id(), 2) then --control check: if there is no target gun or output slot is occupied
+		sb.logError("Reassembler: slots error]") --you should not see this, it is now pre-checked on gui level
 		return false
 	end
 	local modgun = world.containerItemAt(entity.id(), 0)
@@ -172,15 +173,23 @@ function ra.reconstructGun(msg, something, copyParts, copySound, copyAltMode, ne
 			end
 		end
 		
-		--modgun.parameters.inventoryIcon = copyfrom --COPY icon
-		
+		--modgun.parameters.inventoryIcon = copyfrom --COPY icon		
 	end
 	
-	if copySound and templatecfg ~=0 then --copy fire sound
+	if newElement then --if we actually have a non nil shiny new Element		
+		construct(modgun.parameters, "elementalType") --if our weapon is originally physical, there is no such field. Let's try to make it, just in case
+		if newElement == "physical" then
+			modgun.parameters.elementalType = nil -- If we suddenly want to make an elemental weapon into a physical one, lol. Doesn't actually work. Why?
+		else
+			modgun.parameters.elementalType = newElement --aaand that's all folks! Almost.
+		end
+	end
+	
+	if copySound and templatecfg ~= 0 then --copy fire sound
 		construct(modgun.parameters, "animationCustom", "sounds", "fire")
 		if template.parameters and template.parameters.animationCustom and template.parameters.animationCustom.sounds and template.parameters.animationCustom.sounds.fire then
 			modgun.parameters.animationCustom.sounds.fire = template.parameters.animationCustom.sounds.fire
-		else --template has no custom sound, copy from  config
+		else --template has no custom sound, copy from config
 			modgun.parameters.animationCustom.sounds.fire = templatecfg.config.animationCustom.sounds.fire
 		end
 	end

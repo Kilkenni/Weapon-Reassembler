@@ -1,13 +1,13 @@
 {
 	"objectName" : "ra_reassembler",
-	"colonyTags" : ["crafting"],
+	"colonyTags" : ["crafting","mechanical","combat","ponies"],
 	"rarity" : "Rare",
 	"race" : "generic",
 	"objectType" : "container",
 	"category" : "Device",
 	"subtitle" : "Create guns from parts",
 
-	"price" : 100,
+	"price" : 10,
 	"printable" : false,
 	
 	"inventoryIcon" : "/objects/wiring/ra_reassembler/reassemblericon.png",
@@ -22,6 +22,13 @@
 	"humanDescription" : "I hope I won't get jailed for jailbreaking. Wait, what?",
 	"hylotlDescription" : "Somewhat reduces the value of weaponcraft. Still, quite useful.",
 	"novakidDescription" : "Making guns from other guns? Why in the world didn't I think of that earlier? Probably illegal though.",
+	"ponyDescription" : "A useful machine for any sharpshooting pony far from home.",
+	"unicornDescription" : "I feel like LittlePip already.",
+	"pegasusDescription" : "I wonder if Ironshod have seen that.",
+	"alicornDescription" : "Why do I even need this? I have magic.",
+	"batponyDescription" : "Some ponies are just crazy about pimping up their bolts.",
+	"changelingDescription" : "A fitting technology for the Queen. I feel kinsssship",
+	"ponexDescription" : "I wonder if humans have something like this.",
 
 	"orientations" : [
     {

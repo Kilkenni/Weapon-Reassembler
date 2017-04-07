@@ -13,6 +13,24 @@ function init()
 	ra.ElementIsSet = false --Marker for resetting weapon element ONCE when the modgun is available
 	ra.LastWeaponSeed = 0
 	ra.PreviewScale = 2 -- Default scale of the preview image
+	
+	ra.palettepath = "/objects/wiring/ra_reassembler/ra_palette.weaponcolors" --palette swap file path
+	ra.palettes = root.assetJson(util.absolutePath(directory, ra.palettepath)) --init table with palettes
+	ra.dyeIndexes = { --vanilla dyes reference index
+		[0] = "dyeremover",
+		[1] = "black",
+		[2] = "grey",
+		[3] = "white",
+		[4] = "red",
+		[5] = "orange",
+		[6] = "yellow",
+		[7] = "green",
+		[8] = "blue",
+		[9] = "purple",
+		[10] = "pink",
+		[11] = "brown"
+	}
+	
 	self.gunImageZero = {40,85}
 
 	self.highlightPulseTimer = 0
@@ -31,18 +49,18 @@ function init()
 	}
 	
 	self.rangedPaletteIndexes = { --dyes dyeColorIndex+1
-		"", --1 dye remover
-		"", --2 black
-		"4", --3 grey
-		"", --4 white
-		"1", --5 red
-		"3", --6 orange
-		"", --7 yellow
-		"2", --8 green (actually teal, fix it later)
-		"", --9 blue
-		"5", --10 purple
-		"", --11 pink
-		"" --12 brown
+		"", --0+1=1 dye remover
+		"", --1+1=2 black
+		"4", --2+1=3 grey
+		"", --3+1=4 white
+		"1", --4+1=5 red
+		"3", --5+1=6 orange
+		"", --6+1=7 yellow
+		"2", --7+1=8 green (actually teal, fix it later)
+		"", --8+1=9 blue
+		"5", --9+1=10 purple
+		"", --10+1=11 pink
+		"" --11+1=12 brown
 	}
 	self.meleePaletteIndexes = { --dyes dyeColorIndex+1
 		"", --1 dye remover
@@ -63,12 +81,41 @@ function init()
 	ra.altModeElemental =  {"lance", "explosiveburst"} --those abilities are elemental-only
 end
 
+function ra.getDyeName(itemslot)
+	if world.containerItemAt(pane.containerEntityId(), itemslot) then --if there is something in the slot at all
+		if root.itemConfig(world.containerItemAt(pane.containerEntityId(), itemslot)).config.category == "clothingDye" then --if there is a dye in this slot
+			local dyeName = ra.dyeIndexes[root.itemConfig(world.containerItemAt(pane.containerEntityId(), itemslot)).config.dyeColorIndex]
+			if dyeName == nil then --If this dye's name can't be found (dye has no index or no such index in our base)
+				return nil
+			end
+			return dyeName --if all is good, return the name
+		end
+			return false --if the item in the slot is not a dye
+	end
+end
+
+function ra.getPaletteSwap(dyeName,weaponType)
+	if not weaponType or not dyeName then --weaponType is not recognized (or no dyeName, just in case)
+		return nil
+	end
+	local paletteSwap = ra.palettes[weaponType][dyeName] --try to get swap for that weapon type and dye
+	if not paletteSwap then
+		return false --no such dyeName found (most probably not implemented yet)
+	end
+	local swap = ""
+	for origcolor, modcolor in pairs(paletteSwap) do --reformat selected swap to single string
+		swap = string.format("%s?replace=%s=%s", swap, origcolor, modcolor)
+	end
+	return swap
+end
+
+--[[ OLD FUNCTION
 function ra.getPaletteSwap(index) -- build palette swap directives. index = dye index
 	if index < 0 or index > 11 then --if index out of bounds [0, 11]
 		return false
 	end
 	local paletteSwaps = ""
-	if not ra.isModGun() then --there is not mod gun
+	if not ra.isModGun() then --there is no mod gun
 		return nil
 	end
 	local builderConfig = {} --if there is a builderConfig in weapon 1, pick it up
@@ -90,7 +137,7 @@ function ra.getPaletteSwap(index) -- build palette swap directives. index = dye 
 	else
 		return nil
 	end
- end
+ end ]]--
 
 function ra.getAbsImage(path) --removes modifying instructions from the path
 	if not path or type(path) ~= "string" then
@@ -168,23 +215,38 @@ function updateGui()
 				end
 			end
 			--[[
-			if not gunimage then --if there are no images in the tempalte gun itself
+			if not gunimage then --if there are no images in the template gun itself
 				gunimage = templateguncfg.config.inventoryIcon
 			end
 			--]]
-			--[[ TODO LATER
 			if modguncfg.config.paletteSwaps then --if native palette exists - recolor accordingly
 				for i,part in ipairs(gunimage) do
 					part.image = ra.getAbsImage(part.image) .. modguncfg.config.paletteSwaps
 				end
 			end 
-			]]--
 		end
 		
-		--Applying dyes--
-		--[[ TODO LATER
-		for i,part in ipairs(gunimage) do
-			if world.containerItemAt(pane.containerEntityId(), 2+i) and root.itemConfig(world.containerItemAt(pane.containerEntityId(), 2+i)).config.category == "clothingDye" then --if there is a dye
+		--Applying dyes to preview--
+		for i,part in ipairs(gunimage) do --iterate over gun image parts
+			if world.containerItemAt(pane.containerEntityId(), 2+i) then --if there is something in the slot
+				local dyeName = ra.getDyeName(2+i) --slots 0..2 are for weapons
+				if dyeName == false then --not a dye
+					widget.setText("ra_PriceScrArea.ra_lblErrorText",">Unknown item\n in dye slot "..tostring(i+1))
+				end
+				if dyeName == nil then --dye without or with unknown index
+					widget.setText("ra_PriceScrArea.ra_lblErrorText",">Non-standart dye\n in slot "..tostring(i+1))
+				end
+				if dyeName then --this is a vanilla dye or a dye with an index we know
+					local paletteSwap = ""
+					if ra.goodGun(0) then --it checks if it is actually a gun, too!
+						paletteSwap = ra.getPaletteSwap(dyeName,"ranged") --use ranged palettes
+					end
+					if paletteSwap ~= "" then --got our palette and it's not empty (if it is, retain orig colors)
+						part.image = ra.getAbsImage(part.image) .. paletteSwap --recolor
+					end
+				end
+			end
+			--[[
 				local dyeIndex = root.itemConfig(world.containerItemAt(pane.containerEntityId(), 2+i)).config.dyeColorIndex
 				if dyeIndex and ra.getPaletteSwap(dyeIndex) then --if we got a valid index and it returns a good palette
 					local paletteSwap = ra.getPaletteSwap(dyeIndex)
@@ -193,10 +255,9 @@ function updateGui()
 					else --we have a good palette => use it
 						part.image = ra.getAbsImage(part.image) .. paletteSwap
 					end
-				end
-			end
+				end]]--
 		end
-		]]--	
+			
 		
 		--Drawing preview
 		for i,part in ipairs(gunimage) do --iterate over gunimage array
@@ -275,8 +336,8 @@ function ra.goodGun(itemindex)
 	if not guntype or not ra.acceptableGunType then --if we have null weapon or init isn't complete yet
 		return false
 	end
-	for _,goodtype in ipairs(ra.acceptableGunType) do
-		if guntype == goodtype then --if weapon name matches any good one - we can work with it
+	for _,goodguntype in ipairs(ra.acceptableGunType) do
+		if guntype == goodguntype then --if weapon name matches any good one - we can work with it
 			return true
 		end
 	end
@@ -441,7 +502,11 @@ function ra.debugButton(widgetName)
 		sb.logInfo("[HELP DUMP dye.config]"..key.." : "..tostring(value))
 	end
 	--]]
-	for key,value in pairs((world.containerItemAt(pane.containerEntityId(), 0))) do
+	sb.logInfo("[HELP DUMP pal var]"..tostring(ra.palettes))
+	for key,value in pairs(ra.palettes) do
+		sb.logInfo("[HELP DUMP palettes]"..key.." : "..tostring(value))
+	end
+	--[[for key,value in pairs((world.containerItemAt(pane.containerEntityId(), 0))) do
 		sb.logInfo("[HELP DUMP gun]"..key.." : "..tostring(value))
 	end
 	for key,value in pairs((world.containerItemAt(pane.containerEntityId(), 0)).parameters) do
@@ -457,7 +522,7 @@ function ra.debugButton(widgetName)
 	end
 	for key,value in pairs(root.itemConfig(world.containerItemAt(pane.containerEntityId(), 0)).config.altAbility.elementalConfig) do
 		sb.logInfo("[HELP DUMP gun config.altAbility.elementalConfig]"..key.." : "..tostring(value))
-	end
+	end]]
 	
 	--sb.logWarn("[PALETTE INDEX  ]"..dyeIndex)
 	

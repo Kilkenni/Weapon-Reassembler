@@ -9,11 +9,17 @@
 			"808080" : "787784", "606060" : "4f545a", "404040" : "33343c"  // secondary //
 		},
 		"yellow" : {
-			"e35f5d" : "f7dc20", "b22042" : "e2be41", "871132" : "aa8039", // primary - golden //
+			"e35f5d" : "f7dc20", "b22042" : "e2be41", "871132" : "a46e06", // primary - golden //
 			"808080" : "787784", "606060" : "4f545a", "404040" : "33343c"  // secondary - from orange //
 		},
-		"green" : {},
-		"blue" : {},
+		"green" : {
+			"E35F5D" : "51BD3B", "B22042" : "247824", "871132" : "144216", // primary - from dye //
+			"808080" : "8BB48E", "606060" : "657967", "404040" : "435746"  // secondary - from dark+greyish //
+		},
+		"blue" : {
+			"E35F5D" : "5588D4", "B22042" : "344495", "871132" : "1A1C51", // primary - from pure dye //
+			"808080" : "9da8af", "606060" : "676F83", "404040" : "3f3e55"  // secondary - from melee grey primary //
+		},
 		"purple" : { 
 			"e35f5d" : "cb13ff", "b22042" : "9b1dcf", "871132" : "580682", // primary //
 			"808080" : "787784", "606060" : "4f545a", "404040" : "33343c"  // secondary //

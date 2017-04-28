@@ -3,6 +3,9 @@ require "/scripts/vec2.lua"
 require "/scripts/messageutil.lua"
 
 ra = {}
+ra.dye1Option = {}
+ra.dye2Option = {}
+ra.dye3Option = {}
 
 function init()
 	ra.renameVisible = false
@@ -189,6 +192,24 @@ function SetElementOnce(modgun) --call only when there is a suitable modgun!!
 		
 		return true
 	end
+end
+
+function ra.dye1Option.up() --top dye
+end
+
+function ra.dye1Option.down()
+end
+
+function ra.dye2Option.up() --mid dye
+end
+
+function ra.dye2Option.down()
+end
+
+function ra.dye3Option.up() --bottom dye
+end
+
+function ra.dye3Option.down()
 end
 
 function updateGui()

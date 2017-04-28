@@ -453,7 +453,7 @@ function ra.reconstructButton(widgetName)
 	--FIRIN' UP--
 	local modgun = world.containerItemAt(pane.containerEntityId(), 0)
 	local template = world.containerItemAt(pane.containerEntityId(), 1)
-	--[[
+	
 	if copyAltMode then --AltMode check if it is modified
 		for i = 1, #ra.altModeElemental do --check Elemental blacklist
 			if (template.parameters.altAbilityType == ra.altModeElemental[i]) and ra.elementalTypes[widget.getSelectedOption("ra_radioElemental")] == "physical" then --if we copy elem-only mode over physical dmg
@@ -470,7 +470,7 @@ function ra.reconstructButton(widgetName)
 				return false
 			end
 		end
-	end ]]--
+	end
 	
 	local newElement
 	SetElementOnce(modgun) --to ensure we have our weapon element done right we'll call this one more time

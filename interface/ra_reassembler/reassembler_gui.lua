@@ -482,7 +482,14 @@ function ra.reconstructButton(widgetName)
 		newElement = nil --otherwise: disregard it
 	end
 	
-	world.sendEntityMessage(pane.containerEntityId(), "reconstructGun", copyParts, copySound, copyAltMode, newElement, nil)
+	--[[
+	dyeSwaps proposed structure:
+	part1name: paletteswap string
+	part2name: paletteswap string
+	part3name: paletteswap string
+	]]
+	
+	world.sendEntityMessage(pane.containerEntityId(), "reconstructGun", copyParts, nil, copySound, copyAltMode, newElement, nil)
 	widget.playSound("/sfx/objects/penguin_welding4.ogg")
 
 end

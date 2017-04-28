@@ -94,11 +94,11 @@ function ra.getDyeName(itemslot)
 	end
 end
 
-function ra.getPaletteSwap(dyeName,weaponType)
+function ra.getPaletteSwap(dyeName,variant,weaponType)
 	if not weaponType or not dyeName then --weaponType is not recognized (or no dyeName, just in case)
 		return nil
 	end
-	local paletteSwap = ra.palettes[weaponType][dyeName] --try to get swap for that weapon type and dye
+	local paletteSwap = ra.palettes[weaponType][dyeName][variant] --try to get swap for that weapon type and dye
 	if not paletteSwap then
 		return false --no such dyeName found (most probably not implemented yet)
 	end
@@ -146,6 +146,18 @@ function ra.getAbsImage(path) --removes modifying instructions from the path
 	local i,j = string.find(path, "?") --get first index of instructions
 	if i then
 		return string.sub(path,1,i-1) --return the path without instructions
+	else
+		return false
+	end
+end
+
+function ra.getAbsPalette(path) --removes image path from the path, only palette remains
+	if not path or type(path) ~= "string" then
+		return false
+	end
+	local i,j = string.find(path, "?") --get first index of instructions
+	if i then
+		return string.sub(path,i,string.len(path)) --return the path without iamge path, only instructions
 	else
 		return false
 	end
@@ -203,7 +215,11 @@ function updateGui()
 		if templategun then --if we have a good template gun as well
 			for i,part in ipairs(gunimage) do --iterate weapon parts, max i = 3
 				local checkname = "ra_chkPart"..tostring(i)
-				if widget.getChecked(checkname) then --if we need to copy that part
+				local prePaletteSwap = ""
+				if modguncfg.config.paletteSwaps then
+					prePaletteSwap = modguncfg.config.paletteSwaps --preliminary palette swap
+				end
+				if widget.getChecked(checkname) then --if we need to copy that part			
 					if templategun.parameters.inventoryIcon then --if there are custom parts in template
 						gunimage[i] = templategun.parameters.inventoryIcon[i] --try copying part i
 					else --if template uses only vanilla parts
@@ -212,6 +228,15 @@ function updateGui()
 					if not gunimage[i] then --if no custom part in template with this index => we copied nil
 						gunimage[i] = templateguncfg.config.inventoryIcon[i] --copy from config (vanilla part)
 					end
+					if modgun.parameters.inventoryIcon then --if orig gun has custom graphics
+						if ra.getAbsPalette(modgun.parameters.inventoryIcon[i]) then --if we can get palette from it
+							gunimage[i].image = ra.getAbsImage(gunimage[i].image) .. ra.getAbsPalette(modgun.parameters.inventoryIcon[i]) --take recolor from original custom graphics
+						else --use palette from config if it exists (or append empty string otherwise)
+							gunimage[i].image = ra.getAbsImage(gunimage[i].image) .. prePaletteSwap 
+						end
+					else
+						gunimage[i].image = ra.getAbsImage(gunimage[i].image) .. prePaletteSwap
+					end
 				end
 			end
 			--[[
@@ -219,11 +244,13 @@ function updateGui()
 				gunimage = templateguncfg.config.inventoryIcon
 			end
 			--]]
+			--[[
 			if modguncfg.config.paletteSwaps then --if native palette exists - recolor accordingly
 				for i,part in ipairs(gunimage) do
 					part.image = ra.getAbsImage(part.image) .. modguncfg.config.paletteSwaps
 				end
 			end 
+			]]--
 		end
 		
 		--Applying dyes to preview--
@@ -239,7 +266,7 @@ function updateGui()
 				if dyeName then --this is a vanilla dye or a dye with an index we know
 					local paletteSwap = ""
 					if ra.goodGun(0) then --it checks if it is actually a gun, too!
-						paletteSwap = ra.getPaletteSwap(dyeName,"ranged") --use ranged palettes
+						paletteSwap = ra.getPaletteSwap(dyeName,1,"ranged") --use ranged palettes
 					end
 					if paletteSwap ~= "" then --got our palette and it's not empty (if it is, retain orig colors)
 						part.image = ra.getAbsImage(part.image) .. paletteSwap --recolor
@@ -426,10 +453,10 @@ function ra.reconstructButton(widgetName)
 	--FIRIN' UP--
 	local modgun = world.containerItemAt(pane.containerEntityId(), 0)
 	local template = world.containerItemAt(pane.containerEntityId(), 1)
-	
+	--[[
 	if copyAltMode then --AltMode check if it is modified
 		for i = 1, #ra.altModeElemental do --check Elemental blacklist
-			if (template.parameters.altAbilityType == ra.altModeElemental[i]) and --[[modgun.parameters.elementalType]] ra.elementalTypes[widget.getSelectedOption("ra_radioElemental")] == "physical" then --if we copy elem-only mode over physical dmg
+			if (template.parameters.altAbilityType == ra.altModeElemental[i]) and ra.elementalTypes[widget.getSelectedOption("ra_radioElemental")] == "physical" then --if we copy elem-only mode over physical dmg
 				widget.playSound("/sfx/interface/clickon_error_single.ogg")
 				widget.setText("ra_PriceScrArea.ra_lblErrorText",">New altMode is\n locked to elemental")
 				return false
@@ -443,7 +470,7 @@ function ra.reconstructButton(widgetName)
 				return false
 			end
 		end
-	end
+	end ]]--
 	
 	local newElement
 	SetElementOnce(modgun) --to ensure we have our weapon element done right we'll call this one more time
@@ -457,6 +484,7 @@ function ra.reconstructButton(widgetName)
 	
 	world.sendEntityMessage(pane.containerEntityId(), "reconstructGun", copyParts, copySound, copyAltMode, newElement, nil)
 	widget.playSound("/sfx/objects/penguin_welding4.ogg")
+
 end
 
 function ra.resetButton(widgetName)

@@ -116,7 +116,7 @@ end
 
 function ra.reconstructGun(msg, something, copyParts, copySound, copyAltMode, newElement, newName)
 	if not world.containerItemAt(entity.id(), 0) --[[or not world.containerItemAt(entity.id(), 1)]] or world.containerItemAt(entity.id(), 2) then --control check: if there is no target gun or output slot is occupied
-		sb.logError("Reassembler: slots error]") --you should not see this, it is now pre-checked on gui level
+		sb.logError("Reassembler: slots error!") --you should not see this, it is now pre-checked on gui level
 		return false
 	end
 	local modgun = world.containerItemAt(entity.id(), 0)

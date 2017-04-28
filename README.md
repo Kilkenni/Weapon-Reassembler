@@ -17,8 +17,8 @@ C0bra5 - for his useful Recolor Tool (http://community.playstarbound.com/threads
 - [BONUS DONE!] Now with 100% more feedback on errors
 - [PARTIALLY DONE] Weapon reassemble preview
 - [TESTING] Changing weapon element
-- Element: try to implement common gun elements and uncommon gun "physical" element
-- Element: implement UI locks for unavailable combinations
+- [SEEMS IMPOSSIBLE] Element: try to implement common gun elements and uncommon gun "physical" element
+- [TESTING] Element: implement UI locks for unavailable combinations
 - Informative UI
 - Recoloring weapon from scratch (dye punk, can you use it?)
 - Applying reassembly resource costs

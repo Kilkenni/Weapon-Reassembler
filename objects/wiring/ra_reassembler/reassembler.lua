@@ -110,7 +110,7 @@ function ra.getAbsImage(path) --removes modifying instructions from the path
 	if i then
 		return string.sub(path,1,i-1) --return the path without instructions
 	else
-		return false
+		return path
 	end
 end
 
@@ -128,8 +128,8 @@ function ra.reconstructGun(msg, something, copyParts, dyeSwaps, copySound, copyA
 		templatecfg = root.itemConfig(world.containerItemAt(entity.id(), 1))
 		--modgun.parameters.animationPartVariants = template.parameters.animationPartVariants
 		modgun.parameters.animationParts = modgun.parameters.animationParts or {} --create structure
-		local copyfrom = templatecfg.config.animationParts --CHANGE here for separate parts
-		if template.parameters.animationParts then --template has custom graphics already
+		local copyfrom = templatecfg.config.animationParts --first take parts from template's config
+		if template.parameters.animationParts then --template has custom graphics already - use it instead
 			copyfrom = template.parameters.animationParts
 		end
 		--COPYING GRAPHICS			
@@ -184,18 +184,20 @@ function ra.reconstructGun(msg, something, copyParts, dyeSwaps, copySound, copyA
 			newInvIcon = true
 		end
 		
-		for key,value in pairs(modguncfg.config.animationParts) do	
-			if newAnimParts then --"reset" animPart if it is empty
-				modgun.parameters.animationParts[key] = ra.getAbsImage(value) .. (modguncfg.config.paletteSwaps or "")
+		for key,value in pairs(modguncfg.config.animationParts) do
+			if isWeaponPart(key) then --if this is not a muzzleFlash element
+				if newAnimParts then --"reset" animPart if it is empty
+					modgun.parameters.animationParts[key] = ra.getAbsImage(value) .. (modguncfg.config.paletteSwaps or "")
+				end
+				if newInvIcon then --"reset" InvIcon if it was empty
+					modgun.parameters.inventoryIcon[isWeaponPart(key)] = modguncfg.config.inventoryIcon[isWeaponPart(key)]
+					modgun.parameters.inventoryIcon[isWeaponPart(key)].image = ra.getAbsImage(modgun.parameters.inventoryIcon[isWeaponPart(key)].image) .. (modguncfg.config.paletteSwaps or "") --and reset its color swap to default
+				end	
+				if dyeSwaps[isWeaponPart(key)] ~= "" then --if we have a weapon part and its swap is not empty		
+					modgun.parameters.animationParts[key] = ra.getAbsImage(modgun.parameters.animationParts[key]) .. dyeSwaps[isWeaponPart(key)] --replace current swap with dyeSwap
+					modgun.parameters.inventoryIcon[isWeaponPart(key)].image = ra.getAbsImage(modgun.parameters.inventoryIcon[isWeaponPart(key)].image) .. dyeSwaps[isWeaponPart(key)] --aaand inventory icon, too!
+				end --else do nothing
 			end
-			if newInvIcon then --"reset" InvIcon if it was empty
-				modgun.parameters.inventoryIcon[isWeaponPart(key)] = modguncfg.config.inventoryIcon[isWeaponPart(key)]
-				modgun.parameters.inventoryIcon[isWeaponPart(key)].image = ra.getAbsImage(modgun.parameters.inventoryIcon[isWeaponPart(key)].image) .. (modguncfg.config.paletteSwaps or "") --and reset its color swap to default
-			end	
-			if isWeaponPart(key) and dyeSwaps[isWeaponPart(key)] ~= "" then --if we have a weapon part and its swap is not empty		
-				modgun.parameters.animationParts[key] = ra.getAbsImage(modgun.parameters.animationParts[key]) .. dyeSwaps[isWeaponPart(key)] --replace current swap with dyeSwap
-				modgun.parameters.inventoryIcon[isWeaponPart(key)].image = ra.getAbsImage(modgun.parameters.inventoryIcon[isWeaponPart(key)].image) .. dyeSwaps[isWeaponPart(key)] --aaand inventory icon, too!
-			end --else do nothing
 		end
 	end
 	

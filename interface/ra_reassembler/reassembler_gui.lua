@@ -19,12 +19,20 @@ function init()
 	
 	ra.palettepath = "/objects/wiring/ra_reassembler/ra_palette.weaponcolors" --palette swap file path
 	ra.palettes = root.assetJson(util.absolutePath(directory, ra.palettepath)) --init table with palettes
+	--convert keys in ra.palettes.dyeIndexes into integers
+	temptable = {}
+	for key, value in pairs(ra.palettes.dyeIndexes) do
+		temptable[tonumber(key)] = value
+	end
+	ra.palettes.dyeIndexes = temptable
+	
 	ra.dyeSettings = {
 		[1] = { dyeName = "", variant = 1, maxvariant = 1 },
 		[2] = { dyeName = "", variant = 1, maxvariant = 1 },
 		[3] = { dyeName = "", variant = 1, maxvariant = 1 }
 	}
-	ra.dyeIndexes = { --vanilla dyes reference index, IN USE
+	--[[
+	ra.dyeIndexes = { --vanilla dyes reference index, now kept directly in palettes' file
 		[0] = "dyeremover",
 		[1] = "black",
 		[2] = "grey",
@@ -38,6 +46,7 @@ function init()
 		[10] = "pink",
 		[11] = "brown"
 	}
+	]]--
 	
 	self.gunImageZero = {40,85}
 
@@ -92,7 +101,7 @@ end
 function ra.getDyeName(itemslot)
 	if world.containerItemAt(pane.containerEntityId(), itemslot+2) then --if there is something in the slot at all
 		if root.itemConfig(world.containerItemAt(pane.containerEntityId(), itemslot+2)).config.category == "clothingDye" then --if there is a dye in this slot
-			local dyeName = ra.dyeIndexes[root.itemConfig(world.containerItemAt(pane.containerEntityId(), itemslot+2)).config.dyeColorIndex]
+			local dyeName = ra.palettes.dyeIndexes[root.itemConfig(world.containerItemAt(pane.containerEntityId(), itemslot+2)).config.dyeColorIndex]
 			if dyeName == nil then --If this dye's name can't be found (dye has no index or no such index in our base)
 				return nil
 			end
@@ -619,11 +628,10 @@ function ra.debugButton(widgetName)
 	end
 	--]]
 	sb.logInfo("[HELP DUMP pal var]"..tostring(ra.palettes))
-	for key,value in pairs(ra.palettes) do
-		sb.logInfo("[HELP DUMP palettes]"..key.." : "..tostring(value))
+	for key,value in pairs(ra.palettes.dyeIndexes) do
+		sb.logInfo("[HELP DUMP palettes.dyeIndexes]"..tostring(key).." : "..tostring(value))
 	end
-	local temp = {}
-	sb.logWarn("paletteswap 0: "..tostring(ra.getPaletteSwap("ranged","red",0)))
+	
 	--[[for key,value in pairs((world.containerItemAt(pane.containerEntityId(), 0))) do
 		sb.logInfo("[HELP DUMP gun]"..key.." : "..tostring(value))
 	end

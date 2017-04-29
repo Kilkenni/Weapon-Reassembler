@@ -1,4 +1,18 @@
 {
+	"dyeIndexes" : {
+		"0" : "dyeremover",
+		"1" : "black",
+		"2" : "grey",
+		"3" : "white",
+		"4" : "red",
+		"5" : "orange",
+		"6" : "yellow",
+		"7" : "green",
+		"8" : "blue",
+		"9" : "purple",
+		"10" : "pink",
+		"11" : "brown"
+	},
 	"ranged" : {
 		"red" : [{
 			"e35f5d" : "aa1d1b", "b22042" : "8b1311", "871132" : "5d0100", // primary //

@@ -114,6 +114,18 @@ function ra.getAbsImage(path) --removes modifying instructions from the path
 	end
 end
 
+function ra.getAbsPalette(path) --removes image path from the path, only palette remains
+	if not path or type(path) ~= "string" then
+		return false
+	end
+	local i,j = string.find(path, "?") --get first index of instructions
+	if i then
+		return string.sub(path,i,string.len(path)) --return the path without iamge path, only instructions
+	else
+		return false
+	end
+end
+
 function ra.reconstructGun(msg, something, copyParts, dyeSwaps, copySound, copyAltMode, newElement, newName)
 	if not world.containerItemAt(entity.id(), 0) or world.containerItemAt(entity.id(), 2) then --control check: if there is no target gun or output slot is occupied
 		sb.logError("Reassembler: slots error!") --you should not see this, it is now pre-checked on gui level
@@ -135,12 +147,13 @@ function ra.reconstructGun(msg, something, copyParts, dyeSwaps, copySound, copyA
 		--COPYING GRAPHICS			
 		for k, v in pairs(copyfrom) do --iterate on weapon parts
 			if isWeaponPart(k) then --if it IS indeed a weapon part (there's also a muzzle flash there!)
+				local curDye = ra.getAbsPalette(modgun.parameters.animationParts[k]) --save recolor
 				if copyParts[isWeaponPart(k)] then --if we need to copy that part
 					modgun.parameters.animationParts[k] = ra.getAbsImage(v) --copy with default color
 				else --if we don't need it, we still need to copy the existing or the game crashes
-					modgun.parameters.animationParts[k] = ra.getAbsImage(modguncfg.config.animationParts[k])
+					modgun.parameters.animationParts[k] = modgun.parameters.animationParts[k] or ra.getAbsImage(modguncfg.config.animationParts[k]) --keep current or default if no current
 				end
-				modgun.parameters.animationParts[k] = modgun.parameters.animationParts[k] .. (modguncfg.config.paletteSwaps or "") -- + default to own palette (if exists)
+				modgun.parameters.animationParts[k] = modgun.parameters.animationParts[k] .. (curDye or modguncfg.config.paletteSwaps or "") -- + current recolor or default palette (if exists)
 			end			
 		end
 		for part,value in pairs(template.parameters.animationPartVariants) do --copy indexes to calc size correctly
@@ -154,19 +167,28 @@ function ra.reconstructGun(msg, something, copyParts, dyeSwaps, copySound, copyA
 			copyfrom = template.parameters.inventoryIcon
 		end
 		--COPYING INVENTORY ICON
-		modgun.parameters.inventoryIcon = modgun.parameters.inventoryIcon or {} --create structure
+		if not modgun.parameters.inventoryIcon then
+			modgun.parameters.inventoryIcon = {} --create structure
+		end
 		local imageOffset = {0,0}
 		for key, value in pairs(modguncfg.config.inventoryIcon) do
+			local curDye = nil
+			if modgun.parameters.inventoryIcon[key] then --if InvIcon already exists, its elements are not nil
+				curDye = ra.getAbsPalette(modgun.parameters.inventoryIcon[key].image) --save recolor
+				--sb.logWarn("InvIncon image path is "..tostring(modguncfg.config.inventoryIcon[key].image))
+				--sb.logWarn("curDye = "..tostring(curDye))
+			end
 			if copyParts[key] then --if we need to copy that part
 				modgun.parameters.inventoryIcon[key] = copyfrom[key]
 			else --if we don't, copy it from current to preserve full structure and save game from going bonkers
-				modgun.parameters.inventoryIcon[key] = modguncfg.config.inventoryIcon[key]
+				modgun.parameters.inventoryIcon[key] = modgun.parameters.inventoryIcon[key] or modguncfg.config.inventoryIcon[key] --keep current or default if no current
 			end
 			local imageSize = root.imageSize(modgun.parameters.inventoryIcon[key].image)
 			imageOffset = vec2.add(imageOffset, {imageSize[1] / 2, 0}) --add half image width
 			modgun.parameters.inventoryIcon[key].position = imageOffset --set part position
 			imageOffset = vec2.add(imageOffset, {imageSize[1] / 2, 0}) --add another half image width
-			modgun.parameters.inventoryIcon[key].image = ra.getAbsImage(modgun.parameters.inventoryIcon[key].image) .. (modguncfg.config.paletteSwaps or "") --use default palette from config
+			
+			modgun.parameters.inventoryIcon[key].image = ra.getAbsImage(modgun.parameters.inventoryIcon[key].image) .. (curDye or modguncfg.config.paletteSwaps or "") --use default palette from config
 		end		
 	end
 	

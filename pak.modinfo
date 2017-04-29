@@ -1,6 +1,6 @@
 {
   "name" : "Weapon_Reassembler",
-  "version" : "0.3.5alpha",
+  "version" : "0.3.6alpha",
   "path" : ".",
   "dependencies" : [],
   "metadata" : {

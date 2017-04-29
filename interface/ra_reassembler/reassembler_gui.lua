@@ -333,18 +333,6 @@ function updateGui()
 					end
 				end
 			end
-			--[[
-			if not gunimage then --if there are no images in the template gun itself
-				gunimage = templateguncfg.config.inventoryIcon
-			end
-			--]]
-			--[[
-			if modguncfg.config.paletteSwaps then --if native palette exists - recolor accordingly
-				for i,part in ipairs(gunimage) do
-					part.image = ra.getAbsImage(part.image) .. modguncfg.config.paletteSwaps
-				end
-			end 
-			]]--
 		end
 		
 		for i=1,3 do
@@ -365,20 +353,14 @@ function updateGui()
 				end
 				if dyeName then --this is a vanilla dye or a dye with an index we know
 					local paletteSwap = ""
-					--widget.setVisible("ra_lblDye"..tostring(i),true) --show number of variants
-					--RESET dye variant in dye changed!
-					--local paletteVariant = 
 					if ra.goodGun(0) then --it checks if it is actually a gun, too!
 						paletteSwap = ra.getPaletteSwap("ranged",dyeName,ra.dyeSettings[i].variant) --use ranged palettes, dyeName, selected variant
 					end
 					if paletteSwap and paletteSwap ~= "" then --got our palette, it's not false and not empty (if it is, retain orig colors)
 						part.image = ra.getAbsImage(part.image) .. paletteSwap --recolor
 					end
-				else
-					--widget.setVisible("ra_lblDye"..tostring(i),false) --hide number of variants
 				end
-			end
-			
+			end		
 		end
 			
 		
@@ -559,14 +541,13 @@ function ra.reconstructButton(widgetName)
 		newElement = nil --otherwise: disregard it
 	end
 	
-	--FINAL PRE-CHECK
+	--FINAL PRE-CHECKS
 	if not copySound and not copyAltMode and not ra.HasTrue(copyParts) and not ra.HasDye() and not newElement then --if no mod options (sound, AltMode, copyParts, newElement) are active and no dyes present
 		widget.playSound("/sfx/interface/clickon_error.ogg")
 		widget.setText("ra_PriceScrArea.ra_lblErrorText",">No mod options selected")
 		return false
 	end
 
-	--FIRIN' UP--
 	if copyAltMode then --AltMode check if it is modified
 		for i = 1, #ra.altModeElemental do --check Elemental blacklist
 			if (template.parameters.altAbilityType == ra.altModeElemental[i]) and ra.elementalTypes[widget.getSelectedOption("ra_radioElemental")] == "physical" then --if we copy elem-only mode over physical dmg
@@ -585,21 +566,51 @@ function ra.reconstructButton(widgetName)
 		end
 	end
 	
+	--DYES--
 	for i=1,3 do --to ensure we have our dyes we call this one more time. If the dyes didn't change since last preview redraw it should do nothing
 		if not ra.sameDye(i) then --dye in slot i changed OR not-a-dye
 			ra.updateDye(i) --if it is not a dye it just hides the number of variants
 		end
 	end
 	
+	local dyeSwaps = {"","",""}
 	--[[
-	dyeSwaps proposed structure:
-	part1name: paletteswap string
-	part2name: paletteswap string
-	part3name: paletteswap string
+	required dyeSwaps structure (array):
+	part1index: paletteswap string
+	part2index: paletteswap string
+	part3index: paletteswap string
 	]]
+	local noSwaps = true --marker to reset swaps
+	for i=1,3 do --over all gun parts
+		if world.containerItemAt(pane.containerEntityId(), 2+i) then --if there is something in the slot
+			local dyeName = ra.getDyeName(i) --slots 0..2 are for weapons, but +2 is already in the func
+			if dyeName == false then --not a dye
+				widget.setText("ra_PriceScrArea.ra_lblErrorText",">Unknown item in dye slot "..tostring(i))
+				return false
+			end
+			if dyeName == nil then --dye without or with unknown index
+				widget.setText("ra_PriceScrArea.ra_lblErrorText",">Non-standart dye in slot "..tostring(i))
+				return false
+			end
+			if dyeName then --this is a vanilla dye or a dye with an index we know
+				local paletteSwap = ""
+				if ra.goodGun(0) then --it checks if it is actually a gun, too!
+					paletteSwap = ra.getPaletteSwap("ranged",dyeName,ra.dyeSettings[i].variant) --use ranged palettes, dyeName, selected variant
+				end
+				if paletteSwap and paletteSwap ~= "" then --got our palette, it's not false and not empty
+					dyeSwaps[i] = paletteSwap --save it with the according index
+					noSwaps = false --remember that there are swaps
+				end
+			end
+		end		
+	end
 	
+	if noSwaps then --if there were no dyes, at this point noSwaps is still true
+		dyeSwaps = nil --reset dyeSwaps
+	end
+
 	--ra.reconstructGun(msg, something, copyParts, dyeSwaps, copySound, copyAltMode, newElement, newName)
-	world.sendEntityMessage(pane.containerEntityId(), "reconstructGun", copyParts, nil, copySound, copyAltMode, newElement, nil)
+	world.sendEntityMessage(pane.containerEntityId(), "reconstructGun", copyParts, dyeSwaps, copySound, copyAltMode, newElement, nil)
 	widget.playSound("/sfx/objects/penguin_welding4.ogg")
 
 end

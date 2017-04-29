@@ -115,7 +115,7 @@ function ra.getAbsImage(path) --removes modifying instructions from the path
 end
 
 function ra.reconstructGun(msg, something, copyParts, dyeSwaps, copySound, copyAltMode, newElement, newName)
-	if not world.containerItemAt(entity.id(), 0) --[[or not world.containerItemAt(entity.id(), 1)]] or world.containerItemAt(entity.id(), 2) then --control check: if there is no target gun or output slot is occupied
+	if not world.containerItemAt(entity.id(), 0) or world.containerItemAt(entity.id(), 2) then --control check: if there is no target gun or output slot is occupied
 		sb.logError("Reassembler: slots error!") --you should not see this, it is now pre-checked on gui level
 		return false
 	end
@@ -140,13 +140,7 @@ function ra.reconstructGun(msg, something, copyParts, dyeSwaps, copySound, copyA
 				else --if we don't need it, we still need to copy the existing or the game crashes
 					modgun.parameters.animationParts[k] = ra.getAbsImage(modguncfg.config.animationParts[k])
 				end
-				if dyeSwaps then --not nil
-					--if modguncfg.config.paletteSwaps then --if own palette exists
-					modgun.parameters.animationParts[k] = modgun.parameters.animationParts[k] .. (dyeSwaps[k] or modguncfg.config.paletteSwaps or "") -- + apply recolor or default to own palette (if exists)
-					--end
-				else
-					modgun.parameters.animationParts[k] = modgun.parameters.animationParts[k] .. (modguncfg.config.paletteSwaps or "") -- + apply recolor or default to own palette 
-				end
+				modgun.parameters.animationParts[k] = modgun.parameters.animationParts[k] .. (modguncfg.config.paletteSwaps or "") -- + default to own palette (if exists)
 			end			
 		end
 		for part,value in pairs(template.parameters.animationPartVariants) do --copy indexes to calc size correctly
@@ -172,15 +166,40 @@ function ra.reconstructGun(msg, something, copyParts, dyeSwaps, copySound, copyA
 			imageOffset = vec2.add(imageOffset, {imageSize[1] / 2, 0}) --add half image width
 			modgun.parameters.inventoryIcon[key].position = imageOffset --set part position
 			imageOffset = vec2.add(imageOffset, {imageSize[1] / 2, 0}) --add another half image width
-			--if modguncfg.config.paletteSwaps then --if own palette exists (we already have a pic at this step)
-			if dyeSwaps then --try to copy appropriate key settings
-				modgun.parameters.inventoryIcon[key].image = ra.getAbsImage(modgun.parameters.inventoryIcon[key].image) .. (dyeSwaps[key] or modguncfg.config.paletteSwaps or "") -- + apply own palette
-			else --if dyeSwaps is null use default palette from config
-				modgun.parameters.inventoryIcon[key].image = ra.getAbsImage(modgun.parameters.inventoryIcon[key].image) .. (modguncfg.config.paletteSwaps or "")
-			end
+			modgun.parameters.inventoryIcon[key].image = ra.getAbsImage(modgun.parameters.inventoryIcon[key].image) .. (modguncfg.config.paletteSwaps or "") --use default palette from config
 		end		
 	end
 	
+	--DYES
+	--implemented separately from copying parts because we may want just the recolor
+	if dyeSwaps then -- if not nil	
+		local newAnimParts = false
+		local newInvIcon = false
+		if not modgun.parameters.animationParts then
+			modgun.parameters.animationParts = {} --create structure
+			newAnimParts = true
+		end
+		if not modgun.parameters.inventoryIcon then
+			modgun.parameters.inventoryIcon = {} --create structure
+			newInvIcon = true
+		end
+		
+		for key,value in pairs(modguncfg.config.animationParts) do	
+			if newAnimParts then --"reset" animPart if it is empty
+				modgun.parameters.animationParts[key] = ra.getAbsImage(value) .. (modguncfg.config.paletteSwaps or "")
+			end
+			if newInvIcon then --"reset" InvIcon if it was empty
+				modgun.parameters.inventoryIcon[isWeaponPart(key)] = modguncfg.config.inventoryIcon[isWeaponPart(key)]
+				modgun.parameters.inventoryIcon[isWeaponPart(key)].image = ra.getAbsImage(modgun.parameters.inventoryIcon[isWeaponPart(key)].image) .. (modguncfg.config.paletteSwaps or "") --and reset its color swap to default
+			end	
+			if isWeaponPart(key) and dyeSwaps[isWeaponPart(key)] ~= "" then --if we have a weapon part and its swap is not empty		
+				modgun.parameters.animationParts[key] = ra.getAbsImage(modgun.parameters.animationParts[key]) .. dyeSwaps[isWeaponPart(key)] --replace current swap with dyeSwap
+				modgun.parameters.inventoryIcon[isWeaponPart(key)].image = ra.getAbsImage(modgun.parameters.inventoryIcon[isWeaponPart(key)].image) .. dyeSwaps[isWeaponPart(key)] --aaand inventory icon, too!
+			end --else do nothing
+		end
+	end
+	
+	--ELEMENT
 	if newElement then --if we actually have a non nil shiny new Element		
 		construct(modgun.parameters, "elementalType") --if our weapon is originally physical, there is no such field. Let's try to make it, just in case
 		if newElement == "physical" then
@@ -190,6 +209,7 @@ function ra.reconstructGun(msg, something, copyParts, dyeSwaps, copySound, copyA
 		end
 	end
 	
+	--SOUND
 	if copySound and templatecfg ~= 0 then --copy fire sound
 		construct(modgun.parameters, "animationCustom", "sounds", "fire")
 		if template.parameters and template.parameters.animationCustom and template.parameters.animationCustom.sounds and template.parameters.animationCustom.sounds.fire then
@@ -198,16 +218,22 @@ function ra.reconstructGun(msg, something, copyParts, dyeSwaps, copySound, copyA
 			modgun.parameters.animationCustom.sounds.fire = templatecfg.config.animationCustom.sounds.fire
 		end
 	end
+	
+	--ALTMODE
 	if copyAltMode and modgun.parameters.altAbilityType and template.parameters.altAbilityType then --copy Alternative Fire mode (weapon types checked in GUI)
 		modgun.parameters.altAbilityType = template.parameters.altAbilityType
 	end
+	
+	--NAMING
 	if newName then --if renaming
 		--TODO - copy renaming func here
 	end
 	modgun.parameters.tooltipKind = "ra_guncustom" --assigning alt tooltip with "Custom" label
 	
+	--CREATE new gun and REMOVE old one
 	world.containerPutItemsAt(entity.id(), modgun, 2)
 	world.containerTakeAt(entity.id(), 0)
+	--[[ subtract modification cost here ]]
 end
 
 --DEBUG LOG PRINT FUNCTIONS

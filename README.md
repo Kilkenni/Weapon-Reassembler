@@ -21,7 +21,7 @@ C0bra5 - for his useful Recolor Tool (http://community.playstarbound.com/threads
 - [TESTING] Element: implement UI locks for unavailable combinations
 - Informative UI
 - Recoloring weapon from scratch (dye punk, can you use it?)
-- Do nothing with the weapon if no options are selected
+- [DONE!]Do nothing with the weapon if no options are selected
 - Applying reassembly resource costs
 - Support for melee weapons
 - Changing weapon projectile type (for grenade launchers etc) (will cost resources)

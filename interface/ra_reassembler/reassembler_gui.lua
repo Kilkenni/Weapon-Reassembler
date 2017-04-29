@@ -127,12 +127,24 @@ function ra.getPaletteSwap(weaponType,dyeName,variant)
 	return swap
 end
 
-function ra.tableSize(testtable)
-	local size = 0
-	for i in pairs(testtable) do
-		size = size+1
+function ra.HasTrue(boolarray) --returns true if at least 1 array member is true. Returns false otherwise.
+	for i,value in ipairs(boolarray) do
+		if value == true then
+			return true
+		end
 	end
-	return size
+	return false
+end
+
+function ra.HasDye() --returns true if there is at least 1 usable dye in dye slot. Returns false otherwise
+	for i=1,3 do
+		if world.containerItemAt(pane.containerEntityId(), 2+i) then --if there is an item in the slot
+			if ra.getDyeName(i) then --if we can determine dye name for this item (it is not false or nil)
+				return true
+			end
+		end
+	end
+	return false
 end
 
 function ra.getAbsImage(path) --removes modifying instructions from the path
@@ -526,18 +538,35 @@ function ra.reconstructButton(widgetName)
 		widget.setText("ra_PriceScrArea.ra_lblErrorText",">Output slot not empty")
 		return false
 	end
-	if copySound or copyAltMode or copyParts[1] or copyParts[2] or copyParts[3] then --any of the options requiring template is checked
+	if copySound or copyAltMode or ra.HasTrue(copyParts) then --any of the options requiring template is checked
 		if not ra.isTemplateGun() or not ra.sametypeGuns() then --no template gun or gun type mismatch 
 			widget.playSound("/sfx/interface/clickon_error.ogg")
 			widget.setText("ra_PriceScrArea.ra_lblErrorText",">No template gun or gun type mismatch")
 			return false
 		end
 	end
-
-	--FIRIN' UP--
+	
+	--reading weapon Element
 	local modgun = world.containerItemAt(pane.containerEntityId(), 0)
 	local template = world.containerItemAt(pane.containerEntityId(), 1)
+	local newElement
+	SetElementOnce(modgun) --to ensure we have our weapon element done right we'll call this one more time
+	--if the player changed the element manually but it was properly read at first during updateGui(), the marker IsSet is already true, so this should not be a problem... theoretically
+	if widget.getSelectedOption("ra_radioElemental") ~= GetElementalIndex(modgun) then
+	-- if the selected option does not match the current weapon element: remember the selected (new) one
+		newElement = ra.elementalTypes[widget.getSelectedOption("ra_radioElemental")] --set TEXT (!) value
+	else
+		newElement = nil --otherwise: disregard it
+	end
 	
+	--FINAL PRE-CHECK
+	if not copySound and not copyAltMode and not ra.HasTrue(copyParts) and not ra.HasDye() and not newElement then --if no mod options (sound, AltMode, copyParts, newElement) are active and no dyes present
+		widget.playSound("/sfx/interface/clickon_error.ogg")
+		widget.setText("ra_PriceScrArea.ra_lblErrorText",">No mod options selected")
+		return false
+	end
+
+	--FIRIN' UP--
 	if copyAltMode then --AltMode check if it is modified
 		for i = 1, #ra.altModeElemental do --check Elemental blacklist
 			if (template.parameters.altAbilityType == ra.altModeElemental[i]) and ra.elementalTypes[widget.getSelectedOption("ra_radioElemental")] == "physical" then --if we copy elem-only mode over physical dmg
@@ -556,16 +585,6 @@ function ra.reconstructButton(widgetName)
 		end
 	end
 	
-	local newElement
-	SetElementOnce(modgun) --to ensure we have our weapon element done right we'll call this one more time
-	--if the player changed the element manually but it was properly read at first during updateGui(), the marker IsSet is already true, so this should not be a problem... theoretically
-	if widget.getSelectedOption("ra_radioElemental") ~= GetElementalIndex(modgun) then
-	-- if the selected option does not match the current weapon element: remember the selected (new) one
-		newElement = ra.elementalTypes[widget.getSelectedOption("ra_radioElemental")] --set TEXT (!) value
-	else
-		newElement = nil --otherwise: disregard it
-	end
-	
 	for i=1,3 do --to ensure we have our dyes we call this one more time. If the dyes didn't change since last preview redraw it should do nothing
 		if not ra.sameDye(i) then --dye in slot i changed OR not-a-dye
 			ra.updateDye(i) --if it is not a dye it just hides the number of variants
@@ -579,6 +598,7 @@ function ra.reconstructButton(widgetName)
 	part3name: paletteswap string
 	]]
 	
+	--ra.reconstructGun(msg, something, copyParts, dyeSwaps, copySound, copyAltMode, newElement, newName)
 	world.sendEntityMessage(pane.containerEntityId(), "reconstructGun", copyParts, nil, copySound, copyAltMode, newElement, nil)
 	widget.playSound("/sfx/objects/penguin_welding4.ogg")
 

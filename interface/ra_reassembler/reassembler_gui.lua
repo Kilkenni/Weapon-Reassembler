@@ -98,8 +98,9 @@ function ra.getDyeName(itemslot)
 			end
 			return dyeName --if all is good, return the name
 		end
-			return false --if the item in the slot is not a dye
+		return false --if the item in the slot is not a dye
 	end
+	return false --by default
 end
 
 function ra.getPaletteSwap(weaponType,dyeName,variant)
@@ -178,21 +179,51 @@ function SetElementOnce(modgun) --call only when there is a suitable modgun!!
 end
 
 function ra.dye1Option.up() --top dye
+	if ra.dyeSettings[1].variant < ra.dyeSettings[1].maxvariant then
+		ra.dyeSettings[1].variant = ra.dyeSettings[1].variant + 1 --if current variant < maxvariant, increase
+		widget.setText("ra_lblDye1",tostring(ra.dyeSettings[1].variant) .. "/" .. tostring(ra.dyeSettings[1].maxvariant)) --update visual index
+		updateGui() --call instant redraw
+	end
 end
 
 function ra.dye1Option.down()
+	if ra.dyeSettings[1].variant > 1 then
+		ra.dyeSettings[1].variant = ra.dyeSettings[1].variant - 1 --if current variant > 1, decrease
+		widget.setText("ra_lblDye1",tostring(ra.dyeSettings[1].variant) .. "/" .. tostring(ra.dyeSettings[1].maxvariant)) --update visual index
+		updateGui() --call instant redraw
+	end
 end
 
 function ra.dye2Option.up() --mid dye
+	if ra.dyeSettings[2].variant < ra.dyeSettings[2].maxvariant then
+		ra.dyeSettings[2].variant = ra.dyeSettings[2].variant + 1 --if current variant < maxvariant, increase
+		widget.setText("ra_lblDye2",tostring(ra.dyeSettings[2].variant) .. "/" .. tostring(ra.dyeSettings[2].maxvariant)) --update visual index
+		updateGui() --call instant redraw
+	end
 end
 
 function ra.dye2Option.down()
+	if ra.dyeSettings[2].variant > 1 then
+		ra.dyeSettings[2].variant = ra.dyeSettings[2].variant - 1 --if current variant > 1, decrease
+		widget.setText("ra_lblDye2",tostring(ra.dyeSettings[2].variant) .. "/" .. tostring(ra.dyeSettings[2].maxvariant)) --update visual index
+		updateGui() --call instant redraw
+	end
 end
 
 function ra.dye3Option.up() --bottom dye
+	if ra.dyeSettings[3].variant < ra.dyeSettings[3].maxvariant then
+		ra.dyeSettings[3].variant = ra.dyeSettings[3].variant + 1 --if current variant < maxvariant, increase
+		widget.setText("ra_lblDye3",tostring(ra.dyeSettings[3].variant) .. "/" .. tostring(ra.dyeSettings[3].maxvariant)) --update visual index
+		updateGui() --call instant redraw
+	end
 end
 
 function ra.dye3Option.down()
+	if ra.dyeSettings[3].variant > 1 then
+		ra.dyeSettings[3].variant = ra.dyeSettings[3].variant - 1 --if current variant > 1, decrease
+		widget.setText("ra_lblDye3",tostring(ra.dyeSettings[3].variant) .. "/" .. tostring(ra.dyeSettings[3].maxvariant)) --update visual index
+		updateGui() --call instant redraw
+	end
 end
 
 function ra.sameDye(slot) --slot = 1..3
@@ -204,19 +235,22 @@ function ra.sameDye(slot) --slot = 1..3
 	else
 		return false --current dye did change
 	end
+	return false --let's make an update by default, just in case
 end
 
-function ra.updateDye(slot) --Resets dye settings for the slot. Slot = 1..3
-	if not ra.getDyeName(slot) then --if there's something wrong with the new dye
-		widget.setVisible("ra_lblDye"..tostring(slot),false) --hide number of variants
-		return false
-	end
+function ra.updateDye(slot) --Resets dye settings for the slot. Slot = 1..3	
 	local weaponType = ""
 	if ra.goodGun(0) then --if there is a gun in "modgun" slot
 		weaponType = "ranged"
 	end
 	if weaponType == "" then --if weapon type is still undefined, emergency return
 		return nil
+	end
+	if not ra.getDyeName(slot) then --if there's something wrong with the new dye
+		widget.setVisible("ra_lblDye"..tostring(slot),false) --hide number of variants
+		widget.setVisible("dye"..tostring(slot).."Variant",false) --hide spinner
+		ra.dyeSettings[slot].dyeName = "" --reset dye name
+		return false
 	end
 	ra.dyeSettings[slot].dyeName = ra.getDyeName(slot) --save new dye
 	ra.dyeSettings[slot].maxvariant = #(ra.palettes[weaponType][ra.dyeSettings[slot].dyeName])
@@ -226,6 +260,7 @@ function ra.updateDye(slot) --Resets dye settings for the slot. Slot = 1..3
 	end
 	widget.setText("ra_lblDye"..tostring(slot),tostring(ra.dyeSettings[slot].variant) .. "/" .. tostring(ra.dyeSettings[slot].maxvariant))
 	widget.setVisible("ra_lblDye"..tostring(slot),true) --show number of variants
+	widget.setVisible("dye"..tostring(slot).."Variant",true) --show spinner
 	return true
 end
 
@@ -309,17 +344,17 @@ function updateGui()
 				end
 				if dyeName then --this is a vanilla dye or a dye with an index we know
 					local paletteSwap = ""
-					widget.setVisible("ra_lblDye"..tostring(i),true) --show number of variants
+					--widget.setVisible("ra_lblDye"..tostring(i),true) --show number of variants
 					--RESET dye variant in dye changed!
 					--local paletteVariant = 
 					if ra.goodGun(0) then --it checks if it is actually a gun, too!
 						paletteSwap = ra.getPaletteSwap("ranged",dyeName,ra.dyeSettings[i].variant) --use ranged palettes, dyeName, selected variant
 					end
-					if paletteSwap ~= "" then --got our palette and it's not empty (if it is, retain orig colors)
+					if paletteSwap and paletteSwap ~= "" then --got our palette, it's not false and not empty (if it is, retain orig colors)
 						part.image = ra.getAbsImage(part.image) .. paletteSwap --recolor
 					end
 				else
-					widget.setVisible("ra_lblDye"..tostring(i),false) --hide number of variants
+					--widget.setVisible("ra_lblDye"..tostring(i),false) --hide number of variants
 				end
 			end
 			
@@ -522,6 +557,12 @@ function ra.reconstructButton(widgetName)
 		newElement = nil --otherwise: disregard it
 	end
 	
+	for i=1,3 do --to ensure we have our dyes we call this one more time. If the dyes didn't change since last preview redraw it should do nothing
+		if not ra.sameDye(i) then --dye in slot i changed OR not-a-dye
+			ra.updateDye(i) --if it is not a dye it just hides the number of variants
+		end
+	end
+	
 	--[[
 	dyeSwaps proposed structure:
 	part1name: paletteswap string
@@ -581,7 +622,8 @@ function ra.debugButton(widgetName)
 	for key,value in pairs(ra.palettes) do
 		sb.logInfo("[HELP DUMP palettes]"..key.." : "..tostring(value))
 	end
-	sb.logWarn("Red palette variations total: "..tostring(#(ra.palettes["ranged"]["red"])))
+	local temp = {}
+	sb.logWarn("paletteswap 0: "..tostring(ra.getPaletteSwap("ranged","red",0)))
 	--[[for key,value in pairs((world.containerItemAt(pane.containerEntityId(), 0))) do
 		sb.logInfo("[HELP DUMP gun]"..key.." : "..tostring(value))
 	end

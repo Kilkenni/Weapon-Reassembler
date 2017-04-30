@@ -175,8 +175,6 @@ function ra.reconstructGun(msg, something, copyParts, dyeSwaps, copySound, copyA
 			local curDye = nil
 			if modgun.parameters.inventoryIcon[key] then --if InvIcon already exists, its elements are not nil
 				curDye = ra.getAbsPalette(modgun.parameters.inventoryIcon[key].image) --save recolor
-				--sb.logWarn("InvIncon image path is "..tostring(modguncfg.config.inventoryIcon[key].image))
-				--sb.logWarn("curDye = "..tostring(curDye))
 			end
 			if copyParts[key] then --if we need to copy that part
 				modgun.parameters.inventoryIcon[key] = copyfrom[key]

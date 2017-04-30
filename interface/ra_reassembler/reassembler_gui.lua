@@ -285,6 +285,21 @@ function ra.updateDye(slot) --Resets dye settings for the slot. Slot = 1..3
 	return true
 end
 
+function ra.deepCopyTable(sourcetable) --recursive function for copying tables BY VALUE. From lua-users.org
+    local orig_type = type(sourcetable)
+    local copytable
+    if orig_type == 'table' then
+        copytable = {}
+        for orig_key, orig_value in next, sourcetable, nil do
+            copytable[ra.deepCopyTable(orig_key)] = ra.deepCopyTable(orig_value)
+        end
+        setmetatable(copytable, ra.deepCopyTable(getmetatable(sourcetable)))
+    else --simple type, like int, float, boolean...
+        copytable = sourcetable
+    end
+    return copytable
+end
+
 function updateGui()
 	--GUN PREVIEW--
 	---[[
@@ -302,12 +317,12 @@ function updateGui()
 		
 		SetElementOnce(modgun) -- Set weapon element radiogroup to current elem; called once for every new modgun
 		-- local scale = 2 --removed, scale is now a global variable for possible preview zooming
-		local gunimage = modgun.parameters.inventoryIcon --try copy gun's icon images
+		local gunimage = ra.deepCopyTable(modgun.parameters.inventoryIcon) --try copy gun's icon images
 		if not gunimage then --if there are none grab them from config
-			gunimage = modguncfg.config.inventoryIcon
+			gunimage = ra.deepCopyTable(modguncfg.config.inventoryIcon)
 		end
 		if templategun then --if we have a good template gun as well
-			for i,part in ipairs(gunimage) do --iterate weapon parts, max i = 3
+			for i,part in pairs(gunimage) do --iterate weapon parts, max i = 3
 				local checkname = "ra_chkPart"..tostring(i)
 				local prePaletteSwap = ""
 				if modguncfg.config.paletteSwaps then
@@ -322,9 +337,10 @@ function updateGui()
 					if not gunimage[i] then --if no custom part in template with this index => we copied nil
 						gunimage[i] = templateguncfg.config.inventoryIcon[i] --copy from config (vanilla part)
 					end
-					if modgun.parameters.inventoryIcon then --if orig gun has custom graphics
-						if ra.getAbsPalette(modgun.parameters.inventoryIcon[i]) then --if we can get palette from it
-							gunimage[i].image = ra.getAbsImage(gunimage[i].image) .. ra.getAbsPalette(modgun.parameters.inventoryIcon[i]) --take recolor from original custom graphics
+					if modgun.parameters.inventoryIcon and modgun.parameters.inventoryIcon[i] then --if orig gun has custom graphics
+						local curDye = ra.getAbsPalette(modgun.parameters.inventoryIcon[i].image)
+						if curDye then --if got normal palette from it
+							gunimage[i].image = ra.getAbsImage(gunimage[i].image) .. curDye --take recolor from original custom graphics
 						else --use palette from config if it exists (or append empty string otherwise)
 							gunimage[i].image = ra.getAbsImage(gunimage[i].image) .. prePaletteSwap 
 						end
@@ -387,7 +403,6 @@ function updateGui()
 			widget.setText("ra_PriceScrArea.ra_lblDebugText","Yup!")
 		end
 	end
-	--]]
 end
 
 function ra.setHighlight(widgetName)
@@ -659,10 +674,14 @@ function ra.debugButton(widgetName)
 	end
 	--]]
 	sb.logInfo("[HELP DUMP pal var]"..tostring(ra.palettes))
-	for key,value in pairs(ra.palettes.dyeIndexes) do
+	local modgun = world.containerItemAt(pane.containerEntityId(), 0)
+	for key, value in pairs(modgun.parameters.inventoryIcon) do
+		sb.logWarn("[HELP DUMP gun icon] "..tostring(key).." : "..tostring(value.image))
+	end
+	--[[for key,value in pairs(ra.palettes.dyeIndexes) do
 		sb.logInfo("[HELP DUMP palettes.dyeIndexes]"..tostring(key).." : "..tostring(value))
 	end
-	
+	]]--
 	--[[for key,value in pairs((world.containerItemAt(pane.containerEntityId(), 0))) do
 		sb.logInfo("[HELP DUMP gun]"..key.." : "..tostring(value))
 	end

@@ -7,8 +7,11 @@ Known limitations:
 
 ## THANKS
 C0bra5 - for his useful Recolor Tool (http://community.playstarbound.com/threads/update-v1-1-2-recolor-maker-2.105981/)
+
 It would take me ages to create palettes without it.
+
 C0rdyc3p5 - for his friendly SMK, the StarModder's Kit (http://community.playstarbound.com/threads/starmodder-kit-the-modding-ide-wip.117686/)
+
 I usually use it for packing/unpacking my .pak files.
 
 ## TODO:

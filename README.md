@@ -25,7 +25,6 @@ I usually use it for packing/unpacking my .pak files.
 - [DONE] Changing weapon element
 - [TOO MUCH HASSLE] Element: try to implement common gun elements and uncommon gun "physical" element
 - [DONE] Element: implement UI locks for unavailable combinations
-- Fix barrel button to be more recognizeable
 - Change checkboxes for sound and altMode
 - Add sound changes when changing element (automatic or keep it manual as it is now?)
 - Informative UI

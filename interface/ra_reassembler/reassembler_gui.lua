@@ -673,11 +673,7 @@ function ra.debugButton(widgetName)
 		sb.logInfo("[HELP DUMP dye.config]"..key.." : "..tostring(value))
 	end
 	--]]
-	sb.logInfo("[HELP DUMP pal var]"..tostring(ra.palettes))
-	local modgun = world.containerItemAt(pane.containerEntityId(), 0)
-	for key, value in pairs(modgun.parameters.inventoryIcon) do
-		sb.logWarn("[HELP DUMP gun icon] "..tostring(key).." : "..tostring(value.image))
-	end
+
 	--[[for key,value in pairs(ra.palettes.dyeIndexes) do
 		sb.logInfo("[HELP DUMP palettes.dyeIndexes]"..tostring(key).." : "..tostring(value))
 	end

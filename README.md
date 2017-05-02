@@ -25,7 +25,7 @@ I usually use it for packing/unpacking my .pak files.
 - [DONE] Changing weapon element
 - [TOO MUCH HASSLE] Element: try to implement common gun elements and uncommon gun "physical" element
 - [DONE] Element: implement UI locks for unavailable combinations
-- Change checkboxes for sound and altMode
+- Move "Rename" to reassemble, recheck and fix this function
 - Add sound changes when changing element (automatic or keep it manual as it is now?)
 - Informative UI
 - [TESTING] Recoloring weapon from scratch (dye punk, can you use it?)

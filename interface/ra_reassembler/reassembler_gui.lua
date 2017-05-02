@@ -192,9 +192,9 @@ function SetElementOnce(modgun) --call only when there is a suitable modgun!!
 		ra.ElementIsSet = true
 		ra.LastWeaponSeed = modgun.parameters.seed
 		local index = GetElementalIndex(modgun) --calculate elem index in the table
-		widget.setSelectedOption("ra_radioElemental",index) --set this index as a selected option
-		widget.setText("ra_PriceScrArea.ra_lblErrorText","Weapon damage: "..ra.elementalTypes[index].."\n".."Weapon damage index: "..tostring(index))
-		
+		widget.setSelectedOption("ra_radioElemental",index) --set this index as a selected option	
+		--some fancy text: first part of the name (vendor) + description
+		widget.setText("ra_PriceScrArea.ra_lblErrorText","Vendor: "..string.sub(modgun.parameters.shortdescription,1,string.find(modgun.parameters.shortdescription, " ") or string.len(modgun.parameters.shortdescription)))
 		return true
 	end
 end
@@ -362,10 +362,10 @@ function updateGui()
 			if world.containerItemAt(pane.containerEntityId(), 2+i) then --if there is something in the slot
 				local dyeName = ra.getDyeName(i) --slots 0..2 are for weapons, but +2 is already in the func
 				if dyeName == false then --not a dye
-					widget.setText("ra_PriceScrArea.ra_lblErrorText",">Unknown item in dye slot "..tostring(i))
+					widget.setText("ra_PriceScrArea.ra_lblErrorText","^#b22222;>Unknown item in dye slot "..tostring(i))
 				end
 				if dyeName == nil then --dye without or with unknown index
-					widget.setText("ra_PriceScrArea.ra_lblErrorText",">Non-standart dye in slot "..tostring(i))
+					widget.setText("ra_PriceScrArea.ra_lblErrorText","^#b22222;>Non-standart dye in slot "..tostring(i))
 				end
 				if dyeName then --this is a vanilla dye or a dye with an index we know
 					local paletteSwap = ""
@@ -378,8 +378,7 @@ function updateGui()
 				end
 			end		
 		end
-			
-		
+					
 		--Drawing preview
 		for i,part in ipairs(gunimage) do --iterate over gunimage array
 			local imgWidget = "ra_gunImage"..tostring(i) --get widget name
@@ -522,23 +521,23 @@ function ra.reconstructButton(widgetName)
 	--GUN PRE_CHECKS--
 	if not ra.isModGun() then --if there is no gun to work on
 		widget.playSound("/sfx/interface/clickon_error.ogg")
-		widget.setText("ra_PriceScrArea.ra_lblErrorText",">No gun to modify")
+		widget.setText("ra_PriceScrArea.ra_lblErrorText","^#b22222;>No gun to modify")
 		return false
 	end
 	if not ra.goodGun(0) then --if the gun is not "good". That's obvious
 		widget.playSound("/sfx/interface/clickon_error_single.ogg")
-		widget.setText("ra_PriceScrArea.ra_lblErrorText",">Unknown weapon vendor\nPossibly not supported")
+		widget.setText("ra_PriceScrArea.ra_lblErrorText","^#b22222;>Unknown weapon vendor\nPossibly not supported")
 		return false
 	end
 	if ra.isAssembledGun() then --if the pick-up slot is occupied
 		widget.playSound("/sfx/interface/clickon_error.ogg")
-		widget.setText("ra_PriceScrArea.ra_lblErrorText",">Output slot not empty")
+		widget.setText("ra_PriceScrArea.ra_lblErrorText","^#b22222;>Output slot not empty")
 		return false
 	end
 	if copySound or copyAltMode or ra.HasTrue(copyParts) then --any of the options requiring template is checked
 		if not ra.isTemplateGun() or not ra.sametypeGuns() then --no template gun or gun type mismatch 
 			widget.playSound("/sfx/interface/clickon_error.ogg")
-			widget.setText("ra_PriceScrArea.ra_lblErrorText",">No template gun or gun type mismatch")
+			widget.setText("ra_PriceScrArea.ra_lblErrorText","^#b22222;>No template gun or gun type mismatch")
 			return false
 		end
 	end
@@ -559,7 +558,7 @@ function ra.reconstructButton(widgetName)
 	--FINAL PRE-CHECKS
 	if not copySound and not copyAltMode and not ra.HasTrue(copyParts) and not ra.HasDye() and not newElement then --if no mod options (sound, AltMode, copyParts, newElement) are active and no dyes present
 		widget.playSound("/sfx/interface/clickon_error.ogg")
-		widget.setText("ra_PriceScrArea.ra_lblErrorText",">No mod options selected")
+		widget.setText("ra_PriceScrArea.ra_lblErrorText","^#b22222;>No mod options selected")
 		return false
 	end
 
@@ -567,7 +566,7 @@ function ra.reconstructButton(widgetName)
 		for i = 1, #ra.altModeElemental do --check Elemental blacklist
 			if (template.parameters.altAbilityType == ra.altModeElemental[i]) and ra.elementalTypes[widget.getSelectedOption("ra_radioElemental")] == "physical" then --if we copy elem-only mode over physical dmg
 				widget.playSound("/sfx/interface/clickon_error_single.ogg")
-				widget.setText("ra_PriceScrArea.ra_lblErrorText",">New altMode is\n locked to elemental")
+				widget.setText("ra_PriceScrArea.ra_lblErrorText","^#b22222;>New altMode is\n locked to elemental")
 				return false
 			end
 		end
@@ -575,7 +574,7 @@ function ra.reconstructButton(widgetName)
 		for i = 1, #ra.altModeElemental do --check Elemental blacklist
 			if (modgun.parameters.altAbilityType == ra.altModeElemental[i]) and ra.elementalTypes[widget.getSelectedOption("ra_radioElemental")] == "physical" then --if we try to set physical damage on a weapon with elem-only altMode
 				widget.playSound("/sfx/interface/clickon_error_single.ogg")
-				widget.setText("ra_PriceScrArea.ra_lblErrorText",">Current altMode is\n locked to elemental")
+				widget.setText("ra_PriceScrArea.ra_lblErrorText","^#b22222;>Current altMode is\n locked to elemental")
 				return false
 			end
 		end
@@ -600,11 +599,11 @@ function ra.reconstructButton(widgetName)
 		if world.containerItemAt(pane.containerEntityId(), 2+i) then --if there is something in the slot
 			local dyeName = ra.getDyeName(i) --slots 0..2 are for weapons, but +2 is already in the func
 			if dyeName == false then --not a dye
-				widget.setText("ra_PriceScrArea.ra_lblErrorText",">Unknown item in dye slot "..tostring(i))
+				widget.setText("ra_PriceScrArea.ra_lblErrorText","^#b22222;>Unknown item in dye slot "..tostring(i))
 				return false
 			end
 			if dyeName == nil then --dye without or with unknown index
-				widget.setText("ra_PriceScrArea.ra_lblErrorText",">Non-standart dye in slot "..tostring(i))
+				widget.setText("ra_PriceScrArea.ra_lblErrorText","^#b22222;>Non-standart dye in slot "..tostring(i))
 				return false
 			end
 			if dyeName then --this is a vanilla dye or a dye with an index we know

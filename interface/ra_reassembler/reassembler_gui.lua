@@ -8,12 +8,13 @@ ra.dye2Option = {}
 ra.dye3Option = {}
 
 function init()
-	ra.renameVisible = false
+	--ra.renameVisible = false
 	self.currentUpgrades = {}
 	self.highlightImages = config.getParameter("highlightImages")
 	self.autoRefreshRate = config.getParameter("autoRefreshRate")
 	self.autoRefreshTimer = self.autoRefreshRate --timer for calling updateGui
 	ra.ElementIsSet = false --Marker for resetting weapon element ONCE when the modgun is available
+	ra.NameIsSet = false --marker for resetting name ONCE for each new modgun
 	ra.LastWeaponSeed = 0
 	ra.PreviewScale = 2 -- Default scale of the preview image
 	
@@ -300,6 +301,19 @@ function ra.deepCopyTable(sourcetable) --recursive function for copying tables B
     return copytable
 end
 
+function ra.nameReset(widgetName) --called on GUI update tick or when the player hits esc while editing the name
+	if not ra.isModGun() then --if there is no gun to mod. Required because the func can be called directly
+		widget.setText("ra_PriceScrArea.ra_lblErrorText","^#b22222;>No gun to rename")
+		return false	
+	end
+	ra.NameIsSet = true --no internal check for this because we WANT the player to be able to force-reset the name
+	local modgun = world.containerItemAt(pane.containerEntityId(), 0)
+	local gunname = modgun.parameters.shortdescription or ""
+	widget.setText("ra_boxRename", gunname)		
+	return true
+	
+end
+
 function updateGui()
 	--GUN PREVIEW--
 	---[[
@@ -316,6 +330,9 @@ function updateGui()
 		
 		
 		SetElementOnce(modgun) -- Set weapon element radiogroup to current elem; called once for every new modgun
+		if not ra.NameIsSet then -- Reset the name in the renaming textbox once for every new weapon
+			ra.nameReset(nil)
+		end
 		-- local scale = 2 --removed, scale is now a global variable for possible preview zooming
 		local gunimage = ra.deepCopyTable(modgun.parameters.inventoryIcon) --try copy gun's icon images
 		if not gunimage then --if there are none grab them from config
@@ -400,6 +417,10 @@ function updateGui()
 			ra.ElementIsSet = false
 			widget.setSelectedOption("ra_radioElemental",-1)
 			widget.setText("ra_PriceScrArea.ra_lblDebugText","Yup!")
+		end
+		if ra.NameIsSet then -- reset name marker
+			ra.NameIsSet = false
+			widget.setText("ra_boxRename","") --reset name in the textbox
 		end
 	end
 end
@@ -498,16 +519,6 @@ function ra.testCallback(widgetName)
 	widget.playSound("/sfx/interface/ship_confirm1.ogg")
 end
 
-function ra.renameButton(widgetName)
-	if not ra.isModGun() or ra.isAssembledGun() then --if there is no gun or pick-up slot is occupied
-		widget.playSound("/sfx/interface/clickon_error.ogg")
-		return false
-	end
-	ra.renameVisible = not ra.renameVisible
-	widget.setVisible("ra_boxRename", ra.renameVisible)
-	widget.focus( ra.renameVisible and "ra_boxRename" or "ra_btnRename" )
-end
-
 function ra.reconstructButton(widgetName)	
 	--Reading modification settings
 	local copySound = widget.getChecked("ra_chkSound")
@@ -553,6 +564,10 @@ function ra.reconstructButton(widgetName)
 		newElement = ra.elementalTypes[widget.getSelectedOption("ra_radioElemental")] --set TEXT (!) value
 	else
 		newElement = nil --otherwise: disregard it
+	end
+	
+	if not ra.NameIsSet then --reset the name of the weapon if it has't been done yet (maybe the player is fast as buck?)
+		ra.nameReset(nil)
 	end
 	
 	--FINAL PRE-CHECKS
@@ -622,9 +637,15 @@ function ra.reconstructButton(widgetName)
 	if noSwaps then --if there were no dyes, at this point noSwaps is still true
 		dyeSwaps = nil --reset dyeSwaps
 	end
+	
+	--NAME--
+	local newName = widget.getText("ra_boxRename")
+	if newName == modgun.parameters.shortdescription then -- if the "new" name is actually the old name
+		newName = nil --ignore it
+	end
 
 	--ra.reconstructGun(msg, something, copyParts, dyeSwaps, copySound, copyAltMode, newElement, newName)
-	world.sendEntityMessage(pane.containerEntityId(), "reconstructGun", copyParts, dyeSwaps, copySound, copyAltMode, newElement, nil)
+	world.sendEntityMessage(pane.containerEntityId(), "reconstructGun", copyParts, dyeSwaps, copySound, copyAltMode, newElement, newName)
 	widget.playSound("/sfx/objects/penguin_welding4.ogg")
 
 end
@@ -699,14 +720,4 @@ function ra.debugButton(widgetName)
 	
 	--local dyeIndex = root.itemConfig(world.containerItemAt(pane.containerEntityId(), 3)).config.dyeColorIndex
 	widget.playSound("/sfx/interface/scan.ogg")
-end
-
-function ra.renameThis(widgetName)
-  ra.renameVisible = false
-  widget.setVisible("ra_boxRename", false)
-  widget.focus("ra_btnRename")
-  local newName = widget.getText("ra_boxRename")
-  if newName then
-	world.sendEntityMessage(pane.containerEntityId(), "renameGun", newName)
-  end
 end

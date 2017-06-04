@@ -25,11 +25,12 @@ I usually use it for packing/unpacking my .pak files.
 - [DONE] Changing weapon element
 - [TOO MUCH HASSLE] Element: try to implement common gun elements and uncommon gun "physical" element
 - [DONE] Element: implement UI locks for unavailable combinations
-- Move "Rename" to reassemble, recheck and fix this function
-- Add sound changes when changing element (automatic or keep it manual as it is now?)
+- [DONE] Move "Rename" to reassemble, recheck and fix this function
+- Expand renaming textbox to allow lengthy names
+- Add sound changes when changing element (When no template is present - seems more logical than retaining old sound)
 - Informative UI
-- [TESTING] Recoloring weapon from scratch (dye punk, can you use it?)
-- Palettes for every dye, more palettes, palettes!
+- [DONE] Recoloring weapon from scratch (dye punk, can you use it?)
+- [DONE] Palettes for every dye, more palettes, palettes!
 - [DONE] Do nothing with the weapon if no options are selected
 - Applying reassembly resource costs
 - Support for melee weapons

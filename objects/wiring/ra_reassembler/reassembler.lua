@@ -6,7 +6,6 @@ ra = {}
 
 function init()
 	message.setHandler("scanGun", ra.scanGun)
-	message.setHandler("renameGun", ra.renameGun)
 	message.setHandler("reconstructGun", ra.reconstructGun)
 	message.setHandler("resetGun", ra.resetGun)
 	message.setHandler("debugInfo", ra.debugInfo)
@@ -67,21 +66,6 @@ function ra.scanGun(msg, something)
 	for key,value in pairs(modgun.parameters) do
 		sb.logInfo("[HELP DUMP gun.params]"..key.." : "..tostring(value))
 	end
-	return true
-end
-
-function ra.renameGun(msg, something, newName)
-	if newName == "" or not world.containerItemAt(entity.id(), 0) then --if there is no new name or no gun
-		return false
-	end
-	if world.containerItemAt(entity.id(), 0).name ~= "commonassaultrifle" or world.containerItemAt(entity.id(), 2) then --if not assault rifle or slot 3 is occupied
-		return false
-	end
-
-	local modgun = world.containerTakeAt(entity.id(), 0) 
-	modgun.parameters.shortdescription = newName
-	modgun.parameters.tooltipKind = "ra_guncustom"
-	world.containerPutItemsAt(entity.id(), modgun, 2)
 	return true
 end
 
@@ -248,7 +232,9 @@ function ra.reconstructGun(msg, something, copyParts, dyeSwaps, copySound, copyA
 	
 	--NAMING
 	if newName then --if renaming
-		--TODO - copy renaming func here
+		if newName ~= modgun.parameters.shortdescription then --this check actually doubles the one in the GUI lua
+			modgun.parameters.shortdescription = newName
+		end
 	end
 	modgun.parameters.tooltipKind = "ra_guncustom" --assigning alt tooltip with "Custom" label
 	

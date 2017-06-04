@@ -570,8 +570,14 @@ function ra.reconstructButton(widgetName)
 		ra.nameReset(nil)
 	end
 	
+	--NAME--
+	local newName = widget.getText("ra_boxRename")
+	if newName == modgun.parameters.shortdescription or newName == "" then -- if the "new" name is actually the old name or an empty string
+		newName = nil --ignore it
+	end
+	
 	--FINAL PRE-CHECKS
-	if not copySound and not copyAltMode and not ra.HasTrue(copyParts) and not ra.HasDye() and not newElement then --if no mod options (sound, AltMode, copyParts, newElement) are active and no dyes present
+	if not copySound and not copyAltMode and not ra.HasTrue(copyParts) and not ra.HasDye() and not newElement and not newName then --if no mod options (sound, AltMode, copyParts, newElement, newName) are active and no dyes present
 		widget.playSound("/sfx/interface/clickon_error.ogg")
 		widget.setText("ra_PriceScrArea.ra_lblErrorText","^#b22222;>No mod options selected")
 		return false
@@ -636,12 +642,6 @@ function ra.reconstructButton(widgetName)
 	
 	if noSwaps then --if there were no dyes, at this point noSwaps is still true
 		dyeSwaps = nil --reset dyeSwaps
-	end
-	
-	--NAME--
-	local newName = widget.getText("ra_boxRename")
-	if newName == modgun.parameters.shortdescription then -- if the "new" name is actually the old name
-		newName = nil --ignore it
 	end
 
 	--ra.reconstructGun(msg, something, copyParts, dyeSwaps, copySound, copyAltMode, newElement, newName)

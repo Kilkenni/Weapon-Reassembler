@@ -117,11 +117,14 @@ function ra.getPaletteSwap(weaponType,dyeName,variant)
 	if not weaponType or not dyeName then --weaponType is not recognized (or no dyeName, just in case)
 		return nil
 	end
+	local swap = ""
+	if dyeName == "dyeremover" then
+		return swap --if dye = dyeremover, return empty string
+	end
 	local paletteSwap = ra.palettes[weaponType][dyeName][variant] --try to get swap for that weapon type and dye 
 	if not paletteSwap then
 		return false --no such dyeName found (most probably not implemented yet)
 	end
-	local swap = ""
 	for origcolor, modcolor in pairs(paletteSwap) do --reformat selected swap to single string
 		swap = string.format("%s?replace=%s=%s", swap, origcolor, modcolor)
 	end
@@ -389,8 +392,15 @@ function updateGui()
 					if ra.goodGun(0) then --it checks if it is actually a gun, too!
 						paletteSwap = ra.getPaletteSwap("ranged",dyeName,ra.dyeSettings[i].variant) --use ranged palettes, dyeName, selected variant
 					end
-					if paletteSwap and paletteSwap ~= "" then --got our palette, it's not false and not empty (if it is, retain orig colors)
-						part.image = ra.getAbsImage(part.image) .. paletteSwap --recolor
+					if paletteSwap then --got our palette, it's not false and not empty (if it is, retain orig colors)
+						if paletteSwap == "" then --special code for dyeremover
+							part.image = ra.getAbsImage(part.image) .. modguncfg.config.paletteSwaps --recolor to vanilla
+						else
+							part.image = ra.getAbsImage(part.image) .. paletteSwap --recolor
+						end
+					end
+					if paletteSwap == false then --dye is good but has no palette
+						widget.setText("ra_PriceScrArea.ra_lblErrorText","^#b22222;>Dye in slot "..tostring(i).."has no palette settings assigned. Probably not implemented yet.")
 					end
 				end
 			end		
@@ -608,6 +618,7 @@ function ra.reconstructButton(widgetName)
 		end
 	end
 	
+	local modguncfg = root.itemConfig(world.containerItemAt(pane.containerEntityId(), 0)) --read mod gun config
 	local dyeSwaps = {"","",""}
 	--[[
 	required dyeSwaps structure (array):
@@ -632,9 +643,13 @@ function ra.reconstructButton(widgetName)
 				if ra.goodGun(0) then --it checks if it is actually a gun, too!
 					paletteSwap = ra.getPaletteSwap("ranged",dyeName,ra.dyeSettings[i].variant) --use ranged palettes, dyeName, selected variant
 				end
-				if paletteSwap and paletteSwap ~= "" then --got our palette, it's not false and not empty
-					dyeSwaps[i] = paletteSwap --save it with the according index
-					noSwaps = false --remember that there are swaps
+				if paletteSwap then --got our palette, it's not false
+					if paletteSwap == "" then --special code for dyeremover - if the palette is empty
+						dyeSwaps[i] = modguncfg.config.paletteSwaps --get vanilla palette
+					else --general code for any other dye
+						dyeSwaps[i] = paletteSwap --save it with the according index
+					end
+					noSwaps = false --remember that there are swaps to process
 				end
 			end
 		end		

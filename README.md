@@ -26,7 +26,7 @@ I usually use it for packing/unpacking my .pak files.
 - [TOO MUCH HASSLE] Element: try to implement common gun elements and uncommon gun "physical" element
 - [DONE] Element: implement UI locks for unavailable combinations
 - [DONE] Move "Rename" to reassemble, recheck and fix this function
-- Expand renaming textbox to allow lengthy names
+- Add support for DYE REMOVER!
 - Add sound changes when changing element (When no template is present - seems more logical than retaining old sound)
 - Informative UI
 - [DONE] Recoloring weapon from scratch (dye punk, can you use it?)

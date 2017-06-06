@@ -49,7 +49,7 @@ function init()
 	}
 	]]--
 	
-	self.gunImageZero = {40,85}
+	self.gunImageZero = {10,85}
 
 	self.highlightPulseTimer = 0
 	updateGui()
@@ -407,16 +407,34 @@ function updateGui()
 		end
 					
 		--Drawing preview
-		for i,part in ipairs(gunimage) do --iterate over gunimage array
-			local imgWidget = "ra_gunImage"..tostring(i) --get widget name
-			widget.setImage(imgWidget,part.image)
-			widget.setImageScale(imgWidget,ra.PreviewScale)
-			part.position = { root.imageSize(part.image)[1], 0} --calculate size from image part (only X)
-			local imgpos = {0,0}
-			for j=2,i do
-				imgpos = vec2.add(imgpos,gunimage[j-1].position) --sum all previous image parts' sizes
+		if ra.isModGun() and ra.goodGun(0) then --this code is for GUNS ONLY. Req separate implementation for melee weapons
+			local sumX = 0
+			local maxY = 0
+			--gun texture is horizontal: along X all the parts are "appended" while Y is the same (16 tops). Let's use it
+			for i,part in ipairs(gunimage) do --iterate over gunimage array
+				sumX = sumX + root.imageSize(part.image)[1]*ra.PreviewScale --sum all X sizes
+				if root.imageSize(part.image)[2]*ra.PreviewScale > maxY then --save maximum Y coord
+					maxY = root.imageSize(part.image)[2]*ra.PreviewScale
+				end
 			end
-			widget.setPosition(imgWidget, vec2.add(self.gunImageZero, vec2.mul(imgpos,ra.PreviewScale))) --shift images
+			local zeroX = util.round((120-sumX)/2, 0) --calc one of the two "offsets" left and right of the image, round
+			if zeroX < 0 then zeroX = 0 end --to be completely safe. zeroX won't drop below 0
+			local zeroY = util.round((40-maxY)/2, 0) --calc one of the two "offsets" up and down of the image, round
+			if zeroY < 0 then zeroY = 0 end --zeroY won't drop below 0
+			local curZeroVector = vec2.add(self.gunImageZero, {zeroX, zeroY}) -- gunImageZero is a constant of {10,85}
+						
+			for i,part in ipairs(gunimage) do --iterate over gunimage array
+				local imgWidget = "ra_gunImage"..tostring(i) --get widget name
+				widget.setImage(imgWidget,part.image)
+				widget.setImageScale(imgWidget,ra.PreviewScale)
+				part.position = { root.imageSize(part.image)[1], 0} --calculate size from image part (only X)
+				local imgpos = {0,0}
+				for j=2,i do
+					imgpos = vec2.add(imgpos,gunimage[j-1].position) --sum all previous image parts' sizes
+				end
+				widget.setPosition(imgWidget, vec2.add(curZeroVector, vec2.mul(imgpos,ra.PreviewScale))) --shift images
+				--widget.setPosition(imgWidget, vec2.add(self.gunImageZero, vec2.mul(imgpos,ra.PreviewScale))) --shift images
+			end
 		end
 		
 	else --No modgun available or not suitable item
@@ -659,7 +677,7 @@ function ra.reconstructButton(widgetName)
 		dyeSwaps = nil --reset dyeSwaps
 	end
 
-	--ra.reconstructGun(msg, something, copyParts, dyeSwaps, copySound, copyAltMode, newElement, newName)
+	--format: ra.reconstructGun(msg, something, copyParts, dyeSwaps, copySound, copyAltMode, newElement, newName)
 	world.sendEntityMessage(pane.containerEntityId(), "reconstructGun", copyParts, dyeSwaps, copySound, copyAltMode, newElement, newName)
 	widget.playSound("/sfx/objects/penguin_welding4.ogg")
 

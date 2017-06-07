@@ -410,16 +410,17 @@ function updateGui()
 		if ra.isModGun() and ra.goodGun(0) then --this code is for GUNS ONLY. Req separate implementation for melee weapons
 			local sumX = 0
 			local maxY = 0
-			--gun texture is horizontal: along X all the parts are "appended" while Y is the same (16 tops). Let's use it
+			--gun texture is horizontal: along X all the parts are "appended" while Y is the same (16 px max). Let's use it
 			for i,part in ipairs(gunimage) do --iterate over gunimage array
 				sumX = sumX + root.imageSize(part.image)[1]*ra.PreviewScale --sum all X sizes
 				if root.imageSize(part.image)[2]*ra.PreviewScale > maxY then --save maximum Y coord
 					maxY = root.imageSize(part.image)[2]*ra.PreviewScale
 				end
 			end
+			-- we assume the area for drawing our gun is 120x70 px. Most guns will fit.
 			local zeroX = util.round((120-sumX)/2, 0) --calc one of the two "offsets" left and right of the image, round
 			if zeroX < 0 then zeroX = 0 end --to be completely safe. zeroX won't drop below 0
-			local zeroY = util.round((40-maxY)/2, 0) --calc one of the two "offsets" up and down of the image, round
+			local zeroY = util.round((70-maxY)/2, 0) --calc one of the two "offsets" up and down of the image, round
 			if zeroY < 0 then zeroY = 0 end --zeroY won't drop below 0
 			local curZeroVector = vec2.add(self.gunImageZero, {zeroX, zeroY}) -- gunImageZero is a constant of {10,85}
 						
@@ -436,6 +437,7 @@ function updateGui()
 				--widget.setPosition(imgWidget, vec2.add(self.gunImageZero, vec2.mul(imgpos,ra.PreviewScale))) --shift images
 			end
 		end
+		widget.setButtonEnabled("ra_btnZoom", true) --enable zoom button
 		
 	else --No modgun available or not suitable item
 		widget.setImage("ra_gunImage1","")
@@ -450,6 +452,8 @@ function updateGui()
 			ra.NameIsSet = false
 			widget.setText("ra_boxRename","") --reset name in the textbox
 		end
+		ra.PreviewScale = 2 --reset Zoom scale
+		widget.setButtonEnabled("ra_btnZoom", false) --disable zoom button
 	end
 end
 
@@ -545,6 +549,16 @@ end
 
 function ra.testCallback(widgetName)
 	widget.playSound("/sfx/interface/ship_confirm1.ogg")
+end
+
+function ra.zoomButton(widgetName) --switch between zoom 1 and 2
+	ra.PreviewScale = ra.PreviewScale + 1 --increase scale
+	local maxScale = 3
+	if ra.PreviewScale > maxScale then
+		ra.PreviewScale = 1
+	end
+	widget.playSound("/sfx/interface/aichatter2.ogg")
+	updateGui() --force Gui redraw
 end
 
 function ra.reconstructButton(widgetName)	

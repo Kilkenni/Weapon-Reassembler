@@ -18,6 +18,8 @@ function init()
 	ra.LastWeaponSeed = 0
 	ra.PreviewScale = 2 -- Default scale of the preview image
 	
+	ra.helppath = "/interface/ra_reassembler/helpdescriptions.json" --tooltips' descriptions file path
+	ra.helpdescriptions = root.assetJson(util.absolutePath(directory, ra.helppath)) --init table with tooltip descriptions
 	ra.palettepath = "/objects/wiring/ra_reassembler/ra_palette.weaponcolors" --palette swap file path
 	ra.palettes = root.assetJson(util.absolutePath(directory, ra.palettepath)) --init table with palettes
 	--convert keys in ra.palettes.dyeIndexes into integers
@@ -745,14 +747,22 @@ function ra.debugButton(widgetName)
 		sb.logInfo("[HELP DUMP palettes.dyeIndexes]"..tostring(key).." : "..tostring(value))
 	end
 	]]--
-	--[[for key,value in pairs((world.containerItemAt(pane.containerEntityId(), 0))) do
+	--[[
+	for key,value in pairs((world.containerItemAt(pane.containerEntityId(), 0))) do
 		sb.logInfo("[HELP DUMP gun]"..key.." : "..tostring(value))
 	end
-	for key,value in pairs((world.containerItemAt(pane.containerEntityId(), 0)).parameters) do
+	]]
+	--[[
+	for key,value in pairs((world.containerItemAt(pane.containerEntityId(), 0))) do
 		sb.logInfo("[HELP DUMP gun params]"..key.." : "..tostring(value))
 	end
+	]]
+	--[[
+	for key,value in pairs(root.itemConfig(world.containerItemAt(pane.containerEntityId(), 0))) do
+		sb.logInfo("[HELP DUMP gun con]"..key.." : "..tostring(value))
+	end]]
 	
-
+	--[[
 	for key,value in pairs(root.itemConfig(world.containerItemAt(pane.containerEntityId(), 0)).config) do
 		sb.logInfo("[HELP DUMP gun config]"..key.." : "..tostring(value))
 	end
@@ -762,9 +772,19 @@ function ra.debugButton(widgetName)
 	for key,value in pairs(root.itemConfig(world.containerItemAt(pane.containerEntityId(), 0)).config.altAbility.elementalConfig) do
 		sb.logInfo("[HELP DUMP gun config.altAbility.elementalConfig]"..key.." : "..tostring(value))
 	end]]
-	
+
 	--sb.logWarn("[PALETTE INDEX  ]"..dyeIndex)
 	
 	--local dyeIndex = root.itemConfig(world.containerItemAt(pane.containerEntityId(), 3)).config.dyeColorIndex
 	widget.playSound("/sfx/interface/scan.ogg")
+end
+
+function createTooltip(screenPosition) --Undocumented function for in-game help tooltips over UI elements
+	for widgetName, description in pairs(ra.helpdescriptions) do
+		if widget.inMember(widgetName, screenPosition) then
+			local tooltip = config.getParameter("tooltipLayout")
+			tooltip.description.value = description
+		    return tooltip
+		end
+	end
 end

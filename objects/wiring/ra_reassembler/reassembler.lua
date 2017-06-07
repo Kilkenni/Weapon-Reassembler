@@ -1,4 +1,4 @@
---require "/scripts/staticrandom.lua"
+require "/scripts/staticrandom.lua"
 require "/scripts/util.lua"
 require "/scripts/vec2.lua"
 
@@ -110,14 +110,29 @@ function ra.getAbsPalette(path) --removes image path from the path, only palette
 	end
 end
 
+function ra.deepCopyTable(sourcetable) --recursive function for copying tables BY VALUE. From lua-users.org
+    local orig_type = type(sourcetable)
+    local copytable
+    if orig_type == 'table' then
+        copytable = {}
+        for orig_key, orig_value in next, sourcetable, nil do
+            copytable[ra.deepCopyTable(orig_key)] = ra.deepCopyTable(orig_value)
+        end
+        setmetatable(copytable, ra.deepCopyTable(getmetatable(sourcetable)))
+    else --simple type, like int, float, boolean...
+        copytable = sourcetable
+    end
+    return copytable
+end
+
 function ra.reconstructGun(msg, something, copyParts, dyeSwaps, copySound, copyAltMode, newElement, newName)
 	if not world.containerItemAt(entity.id(), 0) or world.containerItemAt(entity.id(), 2) then --control check: if there is no target gun or output slot is occupied
 		sb.logError("Reassembler: slots error!") --you should not see this, it is now pre-checked on gui level
 		return false
 	end
-	local modgun = world.containerItemAt(entity.id(), 0)
+	local modgun = ra.deepCopyTable(world.containerItemAt(entity.id(), 0))
 	local modguncfg = root.itemConfig(modgun)
-	local template = world.containerItemAt(entity.id(), 1)
+	local template = ra.deepCopyTable(world.containerItemAt(entity.id(), 1))
 	local templatecfg = 0
 	
 	if template then --copy graphics
@@ -209,7 +224,8 @@ function ra.reconstructGun(msg, something, copyParts, dyeSwaps, copySound, copyA
 	if newElement then --if we actually have a non nil shiny new Element		
 		construct(modgun.parameters, "elementalType") --if our weapon is originally physical, there is no such field. Let's try to make it, just in case
 		if newElement == "physical" then
-			modgun.parameters.elementalType = nil -- If we suddenly want to make an elemental weapon into a physical one, lol. Doesn't actually work. Why?
+			--modgun.parameters.elementalType = nil -- If we suddenly want to make an elemental weapon into a physical one, lol. Currently breaks an uncommon weapon! Needs more investigation.
+			return false
 		else
 			modgun.parameters.elementalType = newElement --aaand that's all folks! Almost.
 		end

@@ -56,4 +56,6 @@ I usually use it for packing/unpacking my .pak files.
 - Weapon altMode descriptions (inside the station? Icons? Book?)
 - [DECLINED] Maybe: scanning a weapon to "remember" appearance (with no need for a template later)
 - Upgrading weapon stats (will cost resources, will be limited - you won't be able to use a low-tier gun through the entire game)
+- New visuals and animation for the station
+- Wiring support
 - lulz
